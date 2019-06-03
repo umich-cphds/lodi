@@ -26,7 +26,7 @@
 #'   function to convert data frame with factors to numeric design matrix and
 #'   convert that matrix back into a data frame.
 #' @examples
-#' library(clmi)
+#' library(lodmi)
 #' data("toy-example")
 #' covars <- c("smoking", "gender")
 #' clmi.out <- clmi(toy.data, "poll", "batch1", "case_cntrl", covars,
@@ -209,7 +209,7 @@ clmi <- function(df, contaminant, batch, outcome, contam.covars, lod.info,
 #' @examples
 #' # continue example from clmi
 #' # fit model on imputed data and pool results
-#' library(clmi)
+#' library(lodmi)
 #' data("toy-example")
 #' covars <- c("smoking", "gender")
 #' clmi.out <- clmi(toy.data, "poll", "batch1", "case_cntrl", covars,

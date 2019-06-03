@@ -46,7 +46,7 @@ impute the non-detects, etc).
   convert that matrix back into a data frame.
 }
 \examples{
-library(clmi)
+library(lodmi)
 data("toy-example")
 covars <- c("smoking", "gender")
 clmi.out <- clmi(toy.data, "poll", "batch1", "case_cntrl", covars,

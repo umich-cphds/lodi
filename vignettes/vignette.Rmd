@@ -22,7 +22,7 @@ be loaded by running `data("toy-example")`. Let's look at the first 10 entries
 of the example dataset.
 
 ```{r}
-library(clmi)
+library(lodmi)
 
 data("toy-example")
 
