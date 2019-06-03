@@ -1,0 +1,3 @@
+inst/doc
+*.Rcheck
+*tar.gz

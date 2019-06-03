@@ -1,0 +1,20 @@
+Package: lodmi
+Type: Package
+Title: Censored Likelihood Multiple Imputation for Single-Pollutant Models
+Version: 1.0.0
+Author: Jonathan Boss
+Maintainer: Jonathan Boss <bossjona@umich.edu>
+Description: This package implements Censored likelihood Multiple Imputation
+    (CLMI), a method for imputing values below the limit of detection in
+    single-pollutant models. Our implementation of CLMI handles exposure
+    detection limits that may change throughout the course of exposure
+    assessment. 'lodmi' provides functions for imputing and pooling.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports: stats
+RoxygenNote: 6.1.1
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
