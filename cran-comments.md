@@ -6,5 +6,7 @@
 There were no ERRORs or WARNINGs.
 
 There was 1 NOTE:
+* checking CRAN incoming feasibility ... NOTE
+  Maintainer: ‘Alexander Rix <alexrix@umich.edu>’
 
-New submission
+  New submission
