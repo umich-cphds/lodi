@@ -3,4 +3,8 @@
 * Ubuntu 18.04.2 LTS : R 3.6.0
 
 ## R CMD check results
-TODO
+There were no ERRORs or WARNINGs.
+
+There was 1 NOTE:
+
+New submission
