@@ -41,7 +41,6 @@
 clmi <- function(df, contaminant, batch, outcome, contam.covars, lod.info,
                    n.imps = 5, seed, t.function = function(x) x)
 {
-
   if (!is.data.frame(df))
     stop("df must be a data.frame.")
 
