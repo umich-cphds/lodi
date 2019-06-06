@@ -38,7 +38,7 @@ If you encounter a clear bug, please file a minimal reproducible example
 on [github](https://github.com/umich-cphds/lodmi/issues). For questions,
 please email Jonathan Boss at <bossjona@umich.edu>.
 
-\#\#References
+## References
 
 Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
 associations when exposure biomarker detection limits vary across
