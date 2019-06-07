@@ -8,5 +8,6 @@
 #'   \item{smoking}{Smoking status. Either 1 or 0.}
 #'   \item{gender}{Gender. 1 for male, 0 for female.}
 #'   \item{batch1}{Batch status. Integer}
+#'   \item{lod}{batch's limit of detection for patient.}
 #' }
-"toy.data"
+"toy_data"

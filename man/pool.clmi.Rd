@@ -25,9 +25,9 @@ Calculate pooled estimates from \code{clmi.out} objects
 # continue example from clmi
 # fit model on imputed data and pool results
 library(lodmi)
-data("toy-example")
+data("toy_data")
 covars <- c("smoking", "gender")
-clmi.out <- clmi(toy.data, "poll", "batch1", "case_cntrl", covars,
+clmi.out <- clmi(toy_data, "poll", "batch1", "case_cntrl", covars,
                    lod.info = data.frame(batch.info = c("1","0"),
                      lod = c(0.8, 0.65)), 20, 12345,
                    t.function = function(x) log(x))

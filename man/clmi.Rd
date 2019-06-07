@@ -4,31 +4,29 @@
 \alias{clmi}
 \title{Censored Likelihood Multiple Imputation}
 \usage{
-clmi(df, contaminant, batch, outcome, contam.covars, lod.info,
-  n.imps = 5, seed, t.function = function(x) x)
+clmi(formula, df, outcome, exposure, lod, seed, n.imps = 5,
+  t.function = function(x) x)
 }
 \arguments{
-\item{df}{a data.frame with contaminant concentration, batch number,
+\item{df}{a data.frame with exposure concentration, batch number,
 covariates used in imputation, precision variables.}
 
-\item{contaminant}{string corresponding to name of the contaminant variable.}
+\item{outcome}{name of the outcome variable in df.}
 
-\item{batch}{string corresponding to name of batch indicator variable.}
+\item{exposure}{name of the exposure variable in df.}
 
-\item{outcome}{string corresponding to name of binary health outcome}
+\item{seed}{for reproducability}
 
-\item{contam.covars}{covariates to use in imputing contaminant. Can be NULL.}
+\item{n.imps}{number of datasets to impute. Default is 5.}
+
+\item{t.function}{transformation function to apply to the exposure to make
+it normally distributed. Default is no transformation}
+
+\item{contam.covars}{covariates to use in imputing exposure. Can be NULL.}
 
 \item{lod.info}{a two column data.frame. The first column must be named
 "batch.info" corresponds to each batch. The second is named "lod" and
 contains the lods for each batch.}
-
-\item{n.imps}{number of datasets to impute. Default is 5.}
-
-\item{seed}{for reproducability}
-
-\item{t.function}{transformation function to apply to contaminant to make
-it normally distributed. Default is no transformation}
 }
 \description{
 This function performs censored likelihood multiple imputation for
@@ -47,9 +45,9 @@ impute the non-detects, etc).
 }
 \examples{
 library(lodmi)
-data("toy-example")
+data("toy_data")
 covars <- c("smoking", "gender")
-clmi.out <- clmi(toy.data, "poll", "batch1", "case_cntrl", covars,
+clmi.out <- clmi(toy_data, "poll", "batch1", "case_cntrl", covars,
                    lod.info = data.frame(batch.info = c("1","0"),
                      lod = c(0.8, 0.65)), 20, 12345,
                    t.function = function(x) log(x))
