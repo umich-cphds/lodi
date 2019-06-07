@@ -27,6 +27,7 @@ purpose is to compare it to clmi.
 }
 \examples{
 # load lodi's toy data
+library(lodi)
 data("toy_data")
 lodi.out <- lod_root2(case_cntrl ~ poll + smoking + gender, toy_data, poll,
                         lod, logistic)

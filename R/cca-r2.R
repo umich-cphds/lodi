@@ -8,6 +8,7 @@
 #' @param type The type of regression to perform. Acceptable options are
 #'   linear and logistic.
 #' @examples
+#' library(lodi)
 #' # load lodi's toy data
 #' data("toy-example")
 #' x <- lod_cca(case_cntrl ~ poll + smoking + gender, toy.data, logistic)
@@ -48,6 +49,7 @@ lod_cca <- function(formula, data, type)
 #'   "linear" and "logistic".
 #' @examples
 #' # load lodi's toy data
+#' library(lodi)
 #' data("toy_data")
 #' lodi.out <- lod_root2(case_cntrl ~ poll + smoking + gender, toy_data, poll,
 #'                         lod, logistic)

@@ -20,6 +20,7 @@ lod_cca is a helper function that does complete case analysis for
 single polluatant models. Its primary use is to compare it to clmi.
 }
 \examples{
+library(lodi)
 # load lodi's toy data
 data("toy-example")
 x <- lod_cca(case_cntrl ~ poll + smoking + gender, toy.data, logistic)
