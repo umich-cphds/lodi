@@ -1,11 +1,11 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# lodmi
+# lodi
 
 ## Overview
 
-`lodmi` is a package that implements censored likelihood multiple
+`lodi` is a package that implements censored likelihood multiple
 imputation (CLMI) for single pollutant models with exposure biomarkers
 below their respective detection limits. Additionally, implementations
 for standard methods such as single imputation with a constant and
@@ -14,13 +14,9 @@ methods for datasets with a relatively high percent below their
 respective detection limits (say \>25%).
 
 You can learn more about how to implement of CLMI by working through the
-example provided in `vignette("lodmi")`.
+example provided in `vignette("lodi")`.
 
 ## Installation
-
-``` r
-install.packages("lodmi")
-```
 
 ## Development version
 
