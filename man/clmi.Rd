@@ -4,29 +4,19 @@
 \alias{clmi}
 \title{Censored Likelihood Multiple Imputation}
 \usage{
-clmi(formula, df, outcome, exposure, lod, seed, n.imps = 5,
-  t.function = function(x) x)
+clmi(formula, df, lod, seed, n.imps = 5)
 }
 \arguments{
+\item{formula}{a formula in the form of \code{exposure ~ outcome + covariates}}
+
 \item{df}{a data.frame with exposure concentration, batch number,
 covariates used in imputation, precision variables.}
 
-\item{outcome}{name of the outcome variable in df.}
-
-\item{exposure}{name of the exposure variable in df.}
+\item{lod}{name of limit of detection variable in df.}
 
 \item{seed}{for reproducability}
 
 \item{n.imps}{number of datasets to impute. Default is 5.}
-
-\item{t.function}{transformation function to apply to the exposure to make
-it normally distributed. Default is no transformation}
-
-\item{contam.covars}{covariates to use in imputing exposure. Can be NULL.}
-
-\item{lod.info}{a two column data.frame. The first column must be named
-"batch.info" corresponds to each batch. The second is named "lod" and
-contains the lods for each batch.}
 }
 \description{
 This function performs censored likelihood multiple imputation for
@@ -44,13 +34,13 @@ impute the non-detects, etc).
   convert that matrix back into a data frame.
 }
 \examples{
-library(lodmi)
+library(lodi)
 data("toy_data")
-covars <- c("smoking", "gender")
-clmi.out <- clmi(toy_data, "poll", "batch1", "case_cntrl", covars,
-                   lod.info = data.frame(batch.info = c("1","0"),
-                     lod = c(0.8, 0.65)), 20, 12345,
-                   t.function = function(x) log(x))
+# run clmi
+clmi.out <- clmi(poll ~ case_cntrl + smoking + gender, toy_data, lod, 1)
+
+# you can specify a transformation to the exposure in the formula
+clmi.out <- clmi(log(poll) ~ case_cntrl + smoking + gender, toy_data, lod, 1)
 
 }
 \references{

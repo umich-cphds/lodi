@@ -8,132 +8,107 @@
 #' imputation procedure (i.e., number of imputed dataset, covariates used to
 #' impute the non-detects, etc).
 #'
-#' @param df a data.frame with contaminant concentration, batch number,
+#' @param formula a formula in the form of \code{exposure ~ outcome + covariates}
+#' @param df a data.frame with exposure concentration, batch number,
 #'   covariates used in imputation, precision variables.
-#' @param contaminant string corresponding to name of the contaminant variable.
-#' @param batch string corresponding to name of batch indicator variable.
-#' @param outcome string corresponding to name of binary health outcome
-#' @param contam.covars covariates to use in imputing contaminant. Can be NULL.
-#' @param lod.info a two column data.frame. The first column must be named
-#'   "batch.info" corresponds to each batch. The second is named "lod" and
-#'   contains the lods for each batch.
+#' @param lod name of limit of detection variable in df.
 #' @param n.imps number of datasets to impute. Default is 5.
 #' @param seed for reproducability
-#' @param t.function transformation function to apply to contaminant to make
-#'   it normally distributed. Default is no transformation
 #' @note \code{clmi} only supports categorical variables that are numeric,
 #'   (i.e., not factors or characters). You can use the  \code{model.matrix}
 #'   function to convert data frame with factors to numeric design matrix and
 #'   convert that matrix back into a data frame.
 #' @examples
-#' library(lodmi)
-#' data("toy-example")
-#' covars <- c("smoking", "gender")
-#' clmi.out <- clmi(toy.data, "poll", "batch1", "case_cntrl", covars,
-#'                    lod.info = data.frame(batch.info = c("1","0"),
-#'                      lod = c(0.8, 0.65)), 20, 12345,
-#'                    t.function = function(x) log(x))
+#' library(lodi)
+#' data("toy_data")
+#' # run clmi
+#' clmi.out <- clmi(poll ~ case_cntrl + smoking + gender, toy_data, lod, 1)
+#'
+#' # you can specify a transformation to the exposure in the formula
+#' clmi.out <- clmi(log(poll) ~ case_cntrl + smoking + gender, toy_data, lod, 1)
 #'
 #' @references Boss J, Mukherjee B, Ferguson KK, et al. Estimating
 #'   outcome-exposure associations when exposure biomarker detection limits
 #'   vary across batches. To appear in \emph{Epidemiology}. 2019.
 #' @export
-clmi <- function(df, contaminant, batch, outcome, contam.covars, lod.info,
-                   n.imps = 5, seed, t.function = function(x) x)
+clmi <- function(formula, df, lod, seed, n.imps = 5)
 {
+  if (class(formula) != "formula")
+    stop("formula must be a formula")
   if (!is.data.frame(df))
     stop("df must be a data.frame.")
 
-  if (!is.character(contaminant) || length(contaminant) > 1)
-    stop("contaminant must be a length 1 character vector.")
-  if (is.null(df[[contaminant]]))
-    stop(sprintf("%s not in df.\n", contaminant))
-  if (!any(is.na(df[[contaminant]])))
-    stop("contaminant values below lod must be coded as NA")
+  vars <- as.character(attr(stats::terms(formula), "variables"))[-1]
+  outcome <- all.vars(str2lang(vars[2]))
+  if (length(outcome) > 1)
+    stop("Complicated transformation being used on outcome. See help to fix.")
 
-  if (!is.character(batch) || length(batch) > 1)
-    stop("batch must be a length 1 character vector.")
-  if (is.null(df[[batch]]))
-    stop(sprintf("%s not in df.\n", batch))
+  # get the transformation on the exposure
+  transform.init <- str2lang(vars[1])
 
-  if (!is.character(outcome) || length(outcome) > 1)
-    stop("outcome must be a length 1 character vector.")
-  if (is.null(df[[outcome]]))
-    stop(sprintf("%s not in df.\n", outcome))
-  if (any(is.na(df[[outcome]])))
-    stop(sprintf("%s contains missing values.\n", outcome))
+  # get the exposure
+  exposure <- all.vars(transform.init)
+  if (length(exposure) > 1)
+    stop("Complicated transformation on exposure. See help for fix.")
+  # Calculate the transformation function
+  assign(exposure, quote(x))
+  transform <- eval(substitute(substitute(transform.init)))
+  t.function <- function(x) x
+  body(t.function) <- transform
+  environment(t.function) <- new.env()
 
-  if (!is.character(contam.covars))
-    stop("contam.covars must be a character vector.")
-  for (var in contam.covars) {
-    if (is.null(df[[var]]))
-      stop(sprintf("df does not contain %s.\n", var))
-    if (any(is.na(df[[var]])))
-      stop(sprintf("%s contains missing values.\n", var))
-  }
+  lod <- deparse(substitute(lod))
+  if (is.null(df[[lod]]))
+    stop(sprintf("%s not in df", lod))
 
-  if (!is.data.frame(lod.info))
-    stop("lod.info must be a data.frame.")
-  if (is.null(lod.info$batch.info))
-    stop("lod.info must contain a column named \"batch.info\".")
-
-  if (is.null(lod.info$lod))
-    stop("lod.info must contain a column named \"lod\".")
-  if (!is.numeric(lod.info$lod))
-    stop("lod.info$lod must be a numeric vector.")
+  if (!is.numeric(df[[lod]]))
+   stop(sprintf("%s must be numeric."))
 
   if (!is.numeric(seed))
     stop("seed must be a number.")
+  set.seed(seed)
 
   if (!is.numeric(n.imps))
     stop("n.imps must be an integer.")
   if (n.imps < 1)
     stop("n.imps must be >= 1")
 
-  if (!is.function(t.function))
-    stop("t.function must be a function")
-
-  vars <- c(contam.covars, outcome, contaminant)
+  vars <- c(exposure, vars[-1])
   if (any(sapply(vars, function(x) !is.numeric(df[[x]]))))
     stop("clmi only supports floating point / integer variables.")
+  if (any(sapply(vars[-1], function(x) any(is.na(df[[x]])))))
+    stop("The covariates on the rhs of formula cannot contain missing values.")
 
-  set.seed(seed)
-  # Organize Data into non-detects and detects
-  if (!is.null(df$lod))
-    stop("TBD")
+  leftovers <- df[, setdiff(names(df), c(vars,  lod))]
+  df <- df[, c(vars,  lod)]
 
-  df$lod <- sapply(df[[batch]], function(b)
-    lod.info[lod.info$batch.info == b, "lod"]
-  )
+  t.imp.exp <- paste0(exposure, "_transform", "_imputed")
+  df[[t.imp.exp]] <- df[[exposure]]
 
-  t.imp.contam <- paste0(contaminant, "_transform", "_imputed")
-  df[[t.imp.contam]] <- df[[contaminant]]
-
-  obs.above.lod <- !is.na(df[[t.imp.contam]])
+  obs.above.lod <- !is.na(df[[t.imp.exp]])
   # Subjects with concentration above LOD
   above.lod <- df[obs.above.lod,]
   # Subjects with concentration below LOD for each batch
   below.lod <- df[!obs.above.lod,]
 
-  above.matrix <- as.matrix(above.lod[, contam.covars])
-  below.matrix <- as.matrix(below.lod[, contam.covars])
-
+  above.matrix <- as.matrix(above.lod[, vars[-(1:2)]])
+  below.matrix <- as.matrix(below.lod[, vars[-(1:2)]])
   # Perform Multiple Imputation
   imp <- rep(list(below.lod), n.imps)
   for (j in 1:n.imps) {
     #Bootstrap data
     df.bs <- df[sample(nrow(df), nrow(df), T),]
 
-    above.lod.bs <- df.bs[!is.na(df.bs[[t.imp.contam]]),]
-    above.lod.bs[[t.imp.contam]] <- t.function(above.lod.bs[[t.imp.contam]])
+    above.lod.bs <- df.bs[!is.na(df.bs[[t.imp.exp]]),]
+    above.lod.bs[[t.imp.exp]] <- t.function(above.lod.bs[[t.imp.exp]])
 
-    below.lod.bs <- df.bs[is.na(df.bs[[t.imp.contam]]),]
+    below.lod.bs <- df.bs[is.na(df.bs[[t.imp.exp]]),]
     below.lod.bs$lod <- t.function(below.lod.bs$lod)
 
-    above.matrix.bs <- as.matrix(above.lod.bs[, contam.covars])
-    below.matrix.bs <- as.matrix(below.lod.bs[, contam.covars])
+    above.matrix.bs <- as.matrix(above.lod.bs[, vars[-c(1, 2)]])
+    below.matrix.bs <- as.matrix(below.lod.bs[, vars[-c(1, 2)]])
 
-    # calculates the means of (1, contaminant, covariates) given theta
+    # calculates the means of (1, exposure, covariates) given theta
     mu <- function(theta, outcome, covars)
     {
       theta[1] + theta[2] * outcome + covars %*% theta[-(1:3)]
@@ -146,13 +121,13 @@ clmi <- function(df, contaminant, batch, outcome, contam.covars, lod.info,
       mu.b <- mu(theta, below.lod.bs[[outcome]], below.matrix.bs)
       mu.a <- mu(theta, above.lod.bs[[outcome]], above.matrix.bs)
       -sum(log(stats::pnorm(below.lod.bs$lod, mu.b, sqrt(theta[3])))) +
-        sum((above.lod.bs[[t.imp.contam]] - mu.a)^2) / (2 * theta[3]) +
+        sum((above.lod.bs[[t.imp.exp]] - mu.a)^2) / (2 * theta[3]) +
         nrow(above.lod.bs) * 0.5 * log(2 * pi * theta[3])
     }
     # get MLE for Bootstrapped sample
-    theta <- c(0, 0, 1, rep(0, length(contam.covars)))
+    theta <- c(0, 0, 1, rep(0, length(vars[-c(1, 2)])))
     # set lower bounds for theta(3) (variance)
-    lower <- c(-Inf, -Inf, 1e-12, rep(-Inf, length(contam.covars)))
+    lower <- c(-Inf, -Inf, 1e-12, rep(-Inf, length(vars[-c(1, 2)])))
     mle   <- stats::optim(theta, objective, method = "L-BFGS-B", lower = lower)
 
     # Impute missing values
@@ -165,7 +140,7 @@ clmi <- function(df, contaminant, batch, outcome, contam.covars, lod.info,
     probs <- stats::pnorm(normalize(t.function(below.lod$lod), mus, sigma))
     zs    <- stats::qnorm(stats::runif(nrow(below.lod)) * probs)
     vals  <- inv.normalize(zs, mus, sigma)
-    imp[[j]][[t.imp.contam]] <- as.vector(vals)
+    imp[[j]][[t.imp.exp]] <- as.vector(vals)
   }
 
   # Check MLE estimation for original dataset
@@ -174,7 +149,7 @@ clmi <- function(df, contaminant, batch, outcome, contam.covars, lod.info,
     mu.b <- mu(theta, below.lod[[outcome]], below.matrix)
     mu.a <- mu(theta, above.lod[[outcome]], above.matrix)
     -sum(log(stats::pnorm(t.function(below.lod$lod), mu.b, sqrt(theta[3])))) +
-      sum((t.function(above.lod[[t.imp.contam]]) - mu.a)^2) / (2 * theta[3]) +
+      sum((t.function(above.lod[[t.imp.exp]]) - mu.a)^2) / (2 * theta[3]) +
       nrow(above.lod) * 0.5 * log(2 * pi * theta[3])
   }
 
@@ -184,94 +159,65 @@ clmi <- function(df, contaminant, batch, outcome, contam.covars, lod.info,
   prop.sigma <- sqrt(diag(fisher.inf))
   #Aggregate imputed datasets with observed dataset
   imputed.dfs <- imp
-  above.lod[[t.imp.contam]] <- t.function(above.lod[[t.imp.contam]])
-  imputed.dfs <- lapply(imputed.dfs, function(df) rbind(df, above.lod))
+  above.lod[[t.imp.exp]] <- t.function(above.lod[[t.imp.exp]])
+  imputed.dfs <- lapply(imputed.dfs, function(df)
+    cbind(rbind(df, above.lod), leftovers))
 
   structure(
-    list(nimp = n.imps, imputed.dfs = imputed.dfs, transform = t.function,
-         mle = mle$par, fisher.inf = fisher.inf,
-         vars = list(contaminant = contaminant, batch = batch,
-           outcome = outcome, contam.covars = contam.covars, lod.info = lod.info,
-           t.imp.contam = t.imp.contam)),
+    list(formula = formula, nimp = n.imps, imputed.dfs = imputed.dfs,
+           t.function = t.function, mle = mle$par, fisher.inf = fisher.inf),
     class = "clmi.out")
 }
 
 #' Calculate pooled estimates from \code{clmi.out} objects
-#'
+#' @param formula formula to fit. Exposure variable should end in
+#'   \code{_transform_imputed}.
 #' @param clmi.out an object generated by clmi.
-#' @param regression.type type of regression to pool. Valid types are
+#' @param type type of regression to pool. Valid types are
 #'   "logistic" and "linear".
-#' @param outcome.covars a character vector of variables associated
-#'   with the outcome. Only include variable names for variables that were
-#'   not used during imputation (variables that were used for imputation
-#'   are automatically adjusted for).
 #' @examples
 #' # continue example from clmi
 #' # fit model on imputed data and pool results
-#' library(lodmi)
-#' data("toy-example")
-#' covars <- c("smoking", "gender")
-#' clmi.out <- clmi(toy.data, "poll", "batch1", "case_cntrl", covars,
-#'                    lod.info = data.frame(batch.info = c("1","0"),
-#'                      lod = c(0.8, 0.65)), 20, 12345,
-#'                    t.function = function(x) log(x))
-#' results <- pool.clmi(clmi.out, "logistic", NULL)
+#' library(lodi)
+#' data("toy_data")
+#' clmi.out <- clmi(log(poll) ~ case_cntrl + smoking + gender, toy_data, lod, 1)
+#' results <- pool.clmi(case_cntrl ~ poll_transform_imputed + smoking, clmi.out,
+#'                        logistic)
 #'
 #' results$output
 #' @export
-pool.clmi <- function(clmi.out, regression.type = c("logistic, linear"),
-                        outcome.covars = NULL)
+pool.clmi <- function(formula, clmi.out, type)
 {
   if (class(clmi.out) != "clmi.out")
     stop("clmi.out is not an clmi.out object.")
 
-  regression.type <- match.arg(regression.type, c("logistic, linear"))
+  type <- deparse(substitute(type))
+  type <- match.arg(type, c("linear","logistic"))
 
   # Get names used in clmi() function
   imputed.dfs   <- clmi.out$imputed.dfs
-  t.imp.contam  <- clmi.out$vars$t.imp.contam
-  outcome       <- clmi.out$vars$outcome
-  contam.covars <- clmi.out$vars$contam.covars
   n.imps <- clmi.out$nimp
   nobs <- nrow(imputed.dfs[[1]])
 
-  for (covar in outcome.covars) {
-    if (is.null(imputed.dfs[[1]][[covar]]))
-      stop(sprintf("clmi.out does not contain %s.\n", covar))
-    if (!is.numeric(imputed.dfs[[1]][[covar]]))
-      stop(sprintf("%s must be a numeric variable.\n", covar))
-  }
-
   # Get number of coefficients to store
-  covars   <- unique(c(contam.covars, outcome.covars, t.imp.contam))
-  data.fit <- imputed.dfs[[1]][, covars]
-  if (is.vector(data.fit))
-    num_continuous <- 1
-  else
-    num_continuous <- sum(sapply(data.fit, is.numeric))
-
-  # Total number of parameters in logistic regression (+ 1 for the intercept)
-  n.param <- 1 + num_continuous
   # Get estimates and standard errors for each imputed dataset
-  betas       <- matrix(0, n.imps, n.param)
+  betas       <- c()
   varcov      <- vector("list", n.imps)
   regressions <- vector("list", n.imps)
 
-  model <- paste0(outcome, " ~ .")
-  if (regression.type == "logistic") {
+  if (type == "logistic") {
     for(i in 1:n.imps) {
-      data.fit <- imputed.dfs[[i]][, c(covars, outcome)]
-      logreg <- stats::glm(model, family = "binomial", data = data.fit)
-
-      betas[i,]        <- stats::coefficients(logreg)
+      data.fit <- imputed.dfs[[i]]
+      logreg <- stats::glm(formula, family = "binomial", data = data.fit)
+      betas <- rbind(betas, stats::coefficients(logreg))
       varcov[[i]]      <- summary(logreg)$cov.unscaled
       regressions[[i]] <- logreg
     }
   } else {
     for (i in 1:n.imps) {
-      data.fit <- imputed.dfs[[i]][, c(covars, outcome)]
-      linreg <- stats::lm(model, data = data.fit)
-      betas[i,]        <- stats::coefficients(linreg)
+      data.fit <- imputed.dfs[[i]]
+      linreg <- stats::lm(formula, data = data.fit)
+      betas <- rbind(betas, stats::coefficients(linreg))
       varcov[[i]]      <- stats::vcov(linreg)
       regressions[[i]] <- linreg
     }

@@ -4,15 +4,13 @@
 \alias{lod_root2}
 \title{Single pollutant \code{sqrt(2)} imputation.}
 \usage{
-lod_root2(formula, data, exposure, lod, type)
+lod_root2(formula, df, lod, type)
 }
 \arguments{
-\item{formula}{A R formula in the form outcome ~ exposure + covariates.}
+\item{formula}{A R formula in the form \code{outcome ~ exposure + covariates.}}
 
-\item{data}{A data.frame that contains the variables \code{formula}
+\item{df}{A data.frame that contains the variables \code{formula}
 references.}
-
-\item{exposure}{name of the exposure variable}
 
 \item{lod}{name of the limit of detection variable}
 
@@ -25,18 +23,25 @@ single polluatant models. It is pretty common to recode observed values
 below the limit of detection as \code{lod / sqrt(2)}. The function's primary
 purpose is to compare it to clmi.
 }
+\note{
+Depending on the transformation used, a "Complicated transformation" error
+ may occur. For example, the transformation \code{a * exposure} will cause an
+ error.In thise case, define a transformation function as
+ \code{f <- function(exposure) a * exposure} and use \code{f} in your
+ formula. This techincal limitation is unavoidable at the moment.
+}
 \examples{
 # load lodi's toy data
 library(lodi)
 data("toy_data")
-lodi.out <- lod_root2(case_cntrl ~ poll + smoking + gender, toy_data, poll,
-                        lod, logistic)
+lodi.out <- lod_root2(case_cntrl ~ poll + smoking + gender, toy_data, lod,
+                        logistic)
 # see the fit model
 lodi.out$model
 
 # we can log transform poll to make it normally distributed
 lodi.out <- lod_root2(case_cntrl ~ log(poll) + smoking + gender, toy_data,
-                        poll, lod, logistic)
+                        lod, logistic)
 lodi.out$model
 
 # transforming the exposure results in a new column being added to data,
@@ -45,7 +50,7 @@ head(lodi.out$data)
 
 # You can even define your own transformation functions and use them
 f <- function(x) exp(sqrt(x))
-lodi.out <- lod_root2(case_cntrl ~ f(poll) + smoking + gender, toy_data,
-                        poll, lod, logistic)
+lodi.out <- lod_root2(case_cntrl ~ f(poll) + smoking + gender, toy_data, lod,
+                        logistic)
 head(lodi.out$data)
 }

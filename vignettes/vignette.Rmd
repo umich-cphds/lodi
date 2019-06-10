@@ -17,16 +17,16 @@ knitr::opts_chunk$set(
 
 ## Loading `clmi` and an example dataset
 
-For convenience we have included a example dataset called `toy.data`, which can
-be loaded by running `data("toy-example")`. Let's look at the first 10 entries
+For convenience we have included a example dataset called `toy_data`, which can
+be loaded by running `data("toy_data")`. Let's look at the first 10 entries
 of the example dataset.
 
 ```{r}
-library(lodmi)
+library(lodi)
 
-data("toy-example")
+data("toy_data")
 
-head(toy.data, n = 10)
+head(toy_data, n = 10)
 ```
 
 The `id` column gives the study ID and is unimportant for the purposes of this
@@ -46,17 +46,14 @@ The function that performs censored likelihood multiple imputation is the
 `clmi` function. For details see `help(clmi)`.
 
 ```{r}
-clmi.out <- clmi(df = toy.data, contaminant = "poll", batch = "batch1",
-                 outcome = "case_cntrl", contam.covars = c("smoking", "gender"),
-                 lod.info = data.frame(batch.info = c("1","0"),
-                 lod = c(0.8, 0.65)), n.imps = 20, seed = 12345,
-                 t.function = function(x) log(x))
+clmi.out <- clmi(formula = log(poll) ~ case_cntrl + smoking + gender,
+                   df = toy_data, lod = lod, seed = 12345, n.imps = 5)
 ```
 
 Some important things to notice:
 
 - The `contaminant`, `batch`, `outcome`, and `contam.covars` arguments must
-  correspond to the variable names in `toy.data`.
+  correspond to the variable names in `toy_data`.
 
 - The `lod.info` argument is where all of the LOD information goes. The first
   column must be named `batch.info` and contains all levels of the `batch1`
@@ -86,8 +83,8 @@ outcome models on each of the imputed datasets, and pools inference across
 outcome models. For details see `help(pool.clmi)`.
 
 ```{r}
-results <- pool.clmi(clmi.out = clmi.out, regression.type = "logistic",
-                     outcome.covars = NULL)
+results <- pool.clmi(case_cntrl ~ poll_transform_imputed + smoking + gender,
+                       clmi.out = clmi.out, type = logistic)
 ```
 
 A few things that deserve further comment:

@@ -4,12 +4,12 @@
 \alias{lod_cca}
 \title{Single pollutant complete case analysis.}
 \usage{
-lod_cca(formula, data, type)
+lod_cca(formula, df, type)
 }
 \arguments{
 \item{formula}{A R formula in the form outcome ~ exposure + covariates.}
 
-\item{data}{A data.frame that contains the variables \code{formula}
+\item{df}{A data.frame that contains the variables \code{formula}
 references.}
 
 \item{type}{The type of regression to perform. Acceptable options are
@@ -22,8 +22,8 @@ single polluatant models. Its primary use is to compare it to clmi.
 \examples{
 library(lodi)
 # load lodi's toy data
-data("toy-example")
-x <- lod_cca(case_cntrl ~ poll + smoking + gender, toy.data, logistic)
+data("toy_data")
+x <- lod_cca(case_cntrl ~ poll + smoking + gender, toy_data, logistic)
 # see the fit model
 x$model
 }
