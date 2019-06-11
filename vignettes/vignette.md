@@ -3,7 +3,7 @@ title: "Censored Likelihood Multiple Imputation in R"
 author: "Jonathan Boss"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Censored-Likelihood-Multiple-Imputation-in-R}
+  %\VignetteIndexEntry{Censored Likelihood Multiple Imputation in R}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,28 +12,33 @@ vignette: >
 
 ## Loading `clmi` and an example dataset
 
-For convenience we have included a example dataset called `toy.data`, which can
-be loaded by running `data("toy-example")`. Let's look at the first 10 entries
+For convenience we have included a example dataset called `toy_data`, which can
+be loaded by running `data("toy_data")`. Let's look at the first 10 entries
 of the example dataset.
 
 
 ```r
-library(clmi)
+library(lodi)
+#> 
+#> Attaching package: 'lodi'
+#> The following objects are masked _by_ '.GlobalEnv':
+#> 
+#>     clmi, lod_cca, lod_root2, pool.clmi
 
-data("toy-example")
+data("toy_data")
 
-head(toy.data, n = 10)
-#>       id case_cntrl      poll smoking gender batch1
-#> 1  13707          1  3.588607       0      1      0
-#> 2  18641          1        NA       0      0      0
-#> 3  27407          1  2.619124       1      0      0
-#> 4  45462          1  7.203193       0      1      1
-#> 5  50357          1  7.336160       1      1      1
-#> 6  59168          1        NA       0      0      0
-#> 7  61477          1  5.136974       0      1      0
-#> 8  76585          1 11.794483       1      1      0
-#> 9  80681          1  1.280289       0      0      1
-#> 10 84391          1  5.480510       1      1      0
+head(toy_data, n = 10)
+#>       id case_cntrl      poll smoking gender batch1  lod
+#> 1  13707          1  3.588607       0      1      0 0.65
+#> 2  18641          1        NA       0      0      0 0.65
+#> 3  27407          1  2.619124       1      0      0 0.65
+#> 4  45462          1  7.203193       0      1      1 0.80
+#> 5  50357          1  7.336160       1      1      1 0.80
+#> 6  59168          1        NA       0      0      0 0.65
+#> 7  61477          1  5.136974       0      1      0 0.65
+#> 8  76585          1 11.794483       1      1      0 0.65
+#> 9  80681          1  1.280289       0      0      1 0.80
+#> 10 84391          1  5.480510       1      1      0 0.65
 ```
 
 The `id` column gives the study ID and is unimportant for the purposes of this
@@ -54,17 +59,14 @@ The function that performs censored likelihood multiple imputation is the
 
 
 ```r
-clmi.out <- clmi(df = toy.data, contaminant = "poll", batch = "batch1",
-                 outcome = "case_cntrl", contam.covars = c("smoking", "gender"),
-                 lod.info = data.frame(batch.info = c("1","0"),
-                 lod = c(0.8, 0.65)), n.imps = 20, seed = 12345,
-                 t.function = function(x) log(x))
+clmi.out <- clmi(formula = log(poll) ~ case_cntrl + smoking + gender,
+                   df = toy_data, lod = lod, seed = 12345, n.imps = 5)
 ```
 
 Some important things to notice:
 
 - The `contaminant`, `batch`, `outcome`, and `contam.covars` arguments must
-  correspond to the variable names in `toy.data`.
+  correspond to the variable names in `toy_data`.
 
 - The `lod.info` argument is where all of the LOD information goes. The first
   column must be named `batch.info` and contains all levels of the `batch1`
@@ -96,8 +98,9 @@ outcome models. For details see `help(pool.clmi)`.
 
 
 ```r
-results <- pool.clmi(clmi.out = clmi.out, regression.type = "logistic",
-                     outcome.covars = NULL)
+results <- pool.clmi(case_cntrl ~ poll_transform_imputed + smoking + gender,
+                       clmi.out = clmi.out, type = logistic)
+#> Error in pool.clmi(case_cntrl ~ poll_transform_imputed + smoking + gender, : unused argument (type = logistic)
 ```
 
 A few things that deserve further comment:
@@ -125,16 +128,7 @@ To display the pooled results use `$output`:
 
 ```r
 results$output
-#>                                est         se       df     p.values
-#> (Intercept)             0.36182484 0.07518984 93.56554 5.711726e-06
-#> smoking                -0.07641835 0.11822805 93.30180 5.196305e-01
-#> gender                  0.19805710 0.11527821 92.75811 8.911862e-02
-#> poll_transform_imputed  0.08600561 0.04862097 86.14953 8.044996e-02
-#>                             LCL.95    UCL.95
-#> (Intercept)             0.21252462 0.5111251
-#> smoking                -0.31118581 0.1583491
-#> gender                 -0.03087045 0.4269846
-#> poll_transform_imputed -0.01064729 0.1826585
+#> Error in eval(expr, envir, enclos): object 'results' not found
 ```
 
 If you want to look at the individual regressions fit on each imputed dataset use
