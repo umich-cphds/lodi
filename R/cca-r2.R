@@ -1,7 +1,7 @@
 #' Single pollutant complete case analysis.
 #'
 #' lod_cca is a helper function that does complete case analysis for
-#' single polluatant models. Its primary use is to compare it to clmi.
+#' single pollutant models.  The function can be used to compare with clmi.
 #' @param formula A R formula in the form outcome ~ exposure + covariates.
 #' @param df A data.frame that contains the variables \code{formula}
 #'  references.
@@ -35,22 +35,21 @@ lod_cca <- function(formula, df, type)
 
 #' Single pollutant \code{sqrt(2)} imputation.
 #'
-#' lod_root2 is a helper function that does \code{sqrt(2)} single imputation for
-#' single polluatant models. It is pretty common to recode observed values
-#' below the limit of detection as \code{lod / sqrt(2)}. The function's primary
-#' purpose is to compare it to clmi.
-#' @param formula A R formula in the form \code{outcome ~ exposure + covariates.}
+#' lod_root2 is a helper function that performs single imputation with
+#' \code{lod / sqrt(2)}, a common ad hoc approach used in single-pollutant
+#' modeling. The function can be  used to compare with clmi.
+#' @param formula A R formula in the form \code{outcome ~ exposure + covariates}.
 #' @param df A data.frame that contains the variables \code{formula}
 #'  references.
-#' @param lod name of the limit of detection variable
+#' @param lod Name of the limit of detection variable.
 #' @param type The type of regression to perform. Acceptable options are
-#'   "linear" and "logistic".
+#'   linear and logistic.
 #' @note
 #'  Depending on the transformation used, a "Complicated transformation" error
 #'  may occur. For example, the transformation \code{a * exposure} will cause an
-#'  error.In thise case, define a transformation function as
+#'  error. In this case, define a transformation function as
 #'  \code{f <- function(exposure) a * exposure} and use \code{f} in your
-#'  formula. This techincal limitation is unavoidable at the moment.
+#'  formula. This technical limitation is unavoidable at the moment.
 #' @examples
 #' # load lodi's toy data
 #' library(lodi)

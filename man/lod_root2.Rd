@@ -7,28 +7,27 @@
 lod_root2(formula, df, lod, type)
 }
 \arguments{
-\item{formula}{A R formula in the form \code{outcome ~ exposure + covariates.}}
+\item{formula}{A R formula in the form \code{outcome ~ exposure + covariates}.}
 
 \item{df}{A data.frame that contains the variables \code{formula}
 references.}
 
-\item{lod}{name of the limit of detection variable}
+\item{lod}{Name of the limit of detection variable.}
 
 \item{type}{The type of regression to perform. Acceptable options are
-"linear" and "logistic".}
+linear and logistic.}
 }
 \description{
-lod_root2 is a helper function that does \code{sqrt(2)} single imputation for
-single polluatant models. It is pretty common to recode observed values
-below the limit of detection as \code{lod / sqrt(2)}. The function's primary
-purpose is to compare it to clmi.
+lod_root2 is a helper function that performs single imputation with
+\code{lod / sqrt(2)}, a common ad hoc approach used in single-pollutant
+modeling. The function can be  used to compare with clmi.
 }
 \note{
 Depending on the transformation used, a "Complicated transformation" error
  may occur. For example, the transformation \code{a * exposure} will cause an
- error.In thise case, define a transformation function as
+ error. In this case, define a transformation function as
  \code{f <- function(exposure) a * exposure} and use \code{f} in your
- formula. This techincal limitation is unavoidable at the moment.
+ formula. This technical limitation is unavoidable at the moment.
 }
 \examples{
 # load lodi's toy data

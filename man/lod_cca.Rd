@@ -17,7 +17,7 @@ linear and logistic.}
 }
 \description{
 lod_cca is a helper function that does complete case analysis for
-single polluatant models. Its primary use is to compare it to clmi.
+single pollutant models.  The function can be used to compare with clmi.
 }
 \examples{
 library(lodi)

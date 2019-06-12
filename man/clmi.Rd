@@ -7,16 +7,16 @@
 clmi(formula, df, lod, seed, n.imps = 5)
 }
 \arguments{
-\item{formula}{a formula in the form of \code{exposure ~ outcome + covariates}}
+\item{formula}{A formula in the form of \code{exposure ~ outcome + covariates}}
 
-\item{df}{a data.frame with exposure concentration, batch number,
-covariates used in imputation, precision variables.}
+\item{df}{A data.frame with \code{exposure}, \code{outcome} and
+\code{covariates}.}
 
-\item{lod}{name of limit of detection variable in df.}
+\item{lod}{Name of limit of detection variable in \code{df}.}
 
-\item{seed}{for reproducability}
+\item{seed}{For reproducability.}
 
-\item{n.imps}{number of datasets to impute. Default is 5.}
+\item{n.imps}{Number of datasets to impute. Default is 5.}
 }
 \description{
 This function performs censored likelihood multiple imputation for
@@ -29,9 +29,10 @@ impute the non-detects, etc).
 }
 \note{
 \code{clmi} only supports categorical variables that are numeric,
-  (i.e., not factors or characters). You can use the  \code{model.matrix}
-  function to convert data frame with factors to numeric design matrix and
-  convert that matrix back into a data frame.
+  (i.e., not factors or characters). You can use the \code{model.matrix}
+  function to convert a data frame with factors to a numeric design matrix
+  and subsequently convert that matrix back into a data frame using
+  \code{as.data.frame}.
 }
 \examples{
 library(lodi)
