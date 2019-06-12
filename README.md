@@ -13,8 +13,8 @@ complete-case analysis are provided, although we do not recommend these
 methods for datasets with a relatively high percent below their
 respective detection limits (say \>25%).
 
-You can learn more about how to implement of CLMI by working through the
-example provided in `vignette("lodi")`.
+You can learn more about how to use CLMI by working through the
+example provided in `browseVignettes("lodi")`.
 
 ## Installation
 
@@ -25,7 +25,7 @@ install lodmi from GitHub.
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("umich-cphds/lodmi")
+devtools::install_github("umich-cphds/lodmi, build_opt = c()")
 ```
 
 ## Getting help
