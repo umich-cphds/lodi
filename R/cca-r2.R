@@ -21,7 +21,7 @@ lod_cca <- function(formula, df, type)
       stop("formula must be a formula")
   if (!is.data.frame(df))
         stop("df must be a data.frame")
-  type <- as.character(substitute(type))
+  type <- deparse(substitute(type))
   type <- match.arg(type, c("linear", "logistic"))
   df <- stats::na.omit(df)
 
@@ -82,7 +82,7 @@ lod_root2 <- function(formula, df, lod, type)
       stop("df must be a data.frame")
 
   # get the transformation on the exposure
-  transform.init <- str2lang(labels(stats::terms(formula))[1])
+  transform.init <- rlang::parse_expr(labels(stats::terms(formula))[1])
   # get the exposure
   exposure  <- all.vars(transform.init)
   if (length(exposure) > 1)

@@ -34,29 +34,25 @@
 #' @export
 clmi <- function(formula, df, lod, seed, n.imps = 5)
 {
-  if (class(formula) != "formula")
+  if (!rlang::is_formula(formula))
     stop("formula must be a formula")
   if (!is.data.frame(df))
     stop("df must be a data.frame.")
 
-  vars <- as.character(attr(stats::terms(formula), "variables"))[-1]
-  outcome <- all.vars(str2lang(vars[2]))
-  if (length(outcome) > 1)
-    stop("Complicated transformation being used on outcome. See help to fix.")
-
-  # get the transformation on the exposure
-  transform.init <- str2lang(vars[1])
-
-  # get the exposure
+  transform.init <- rlang::f_lhs(formula)
   exposure <- all.vars(transform.init)
   if (length(exposure) > 1)
     stop("Complicated transformation on exposure. See help for fix.")
+
+  vars <- all.vars(rlang::f_rhs(formula))
+  outcome <- vars[1]
   # Calculate the transformation function
-  assign(exposure, quote(x))
-  transform <- eval(substitute(substitute(transform.init)))
+  eval(rlang::expr(`=`(!!exposure, quote(x))))
+
+  transform <- eval(rlang::expr(substitute(!!transform.init)))
   t.function <- function(x) x
-  body(t.function) <- transform
-  environment(t.function) <- new.env()
+  rlang::fn_body(t.function) <- transform
+  rlang::fn_env(t.function) <- new.env()
 
   lod <- deparse(substitute(lod))
   if (is.null(df[[lod]]))
@@ -68,13 +64,11 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
   if (!is.numeric(seed))
     stop("seed must be a number.")
   set.seed(seed)
-
   if (!is.numeric(n.imps))
     stop("n.imps must be an integer.")
   if (n.imps < 1)
     stop("n.imps must be >= 1")
-
-  vars <- c(exposure, vars[-1])
+  vars <- c(exposure, vars)
   if (any(sapply(vars, function(x) !is.numeric(df[[x]]))))
     stop("clmi only supports floating point / integer variables.")
   if (any(sapply(vars[-1], function(x) any(is.na(df[[x]])))))
@@ -104,7 +98,7 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
     above.lod.bs[[t.imp.exp]] <- t.function(above.lod.bs[[t.imp.exp]])
 
     below.lod.bs <- df.bs[is.na(df.bs[[t.imp.exp]]),]
-    below.lod.bs$lod <- t.function(below.lod.bs$lod)
+    below.lod.bs[[lod]] <- t.function(below.lod.bs[[lod]])
 
     above.matrix.bs <- as.matrix(above.lod.bs[, vars[-c(1, 2)]])
     below.matrix.bs <- as.matrix(below.lod.bs[, vars[-c(1, 2)]])
@@ -121,10 +115,11 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
     {
       mu.b <- mu(theta, below.lod.bs[[outcome]], below.matrix.bs)
       mu.a <- mu(theta, above.lod.bs[[outcome]], above.matrix.bs)
-      -sum(log(stats::pnorm(below.lod.bs$lod, mu.b, sqrt(theta[3])))) +
+      -sum(log(stats::pnorm(below.lod.bs[[lod]], mu.b, sqrt(theta[3])))) +
         sum((above.lod.bs[[t.imp.exp]] - mu.a)^2) / (2 * theta[3]) +
         nrow(above.lod.bs) * 0.5 * log(2 * pi * theta[3])
     }
+
     # get MLE for Bootstrapped sample
     theta <- c(0, 0, 1, rep(0, length(vars[-c(1, 2)])))
     # set lower bounds for theta(3) (variance)
@@ -138,18 +133,17 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
     normalize     <- function(x, mu, sd) (x - mu) / sd
     inv.normalize <- function(x, mu, sd) x * sd + mu
 
-    probs <- stats::pnorm(normalize(t.function(below.lod$lod), mus, sigma))
+    probs <- stats::pnorm(normalize(t.function(below.lod[[lod]]), mus, sigma))
     zs    <- stats::qnorm(stats::runif(nrow(below.lod)) * probs)
     vals  <- inv.normalize(zs, mus, sigma)
     imp[[j]][[t.imp.exp]] <- as.vector(vals)
   }
-
   # Check MLE estimation for original dataset
   objective <- function(theta)
   {
     mu.b <- mu(theta, below.lod[[outcome]], below.matrix)
     mu.a <- mu(theta, above.lod[[outcome]], above.matrix)
-    -sum(log(stats::pnorm(t.function(below.lod$lod), mu.b, sqrt(theta[3])))) +
+    -sum(log(stats::pnorm(t.function(below.lod[[lod]]), mu.b, sqrt(theta[3])))) +
       sum((t.function(above.lod[[t.imp.exp]]) - mu.a)^2) / (2 * theta[3]) +
       nrow(above.lod) * 0.5 * log(2 * pi * theta[3])
   }
