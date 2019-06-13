@@ -50,7 +50,7 @@ clmi.out <- clmi(formula = log(poll) ~ case_cntrl + smoking + gender,
                    df = toy_data, lod = lod, seed = 12345, n.imps = 5)
 ```
 
-The main input to `clmi` is an R formula. The left hand side of the formula
+The main input to `clmi` is a R formula. The left hand side of the formula
 must be the exposure, and the right hand side must be the outcome and then
 the other covariates of interest. The order of variables on the right hand side
 matters. You can apply a transformation to the exposure by applying a function
