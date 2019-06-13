@@ -21,17 +21,17 @@ example provided in `browseVignettes("lodi")`.
 ## Development version
 
 To get a bug fix, or use a feature from the development version, you can
-install lodmi from GitHub.
+install lodi from GitHub.
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("umich-cphds/lodmi, build_opt = c()")
+devtools::install_github("umich-cphds/lodi, build_opt = c()")
 ```
 
 ## Getting help
 
 If you encounter a clear bug, please file a minimal reproducible example
-on [github](https://github.com/umich-cphds/lodmi/issues). For questions,
+on [github](https://github.com/umich-cphds/lodi/issues). For questions,
 please email Jonathan Boss at <bossjona@umich.edu>.
 
 ## References
