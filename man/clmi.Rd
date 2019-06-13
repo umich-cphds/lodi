@@ -7,7 +7,7 @@
 clmi(formula, df, lod, seed, n.imps = 5)
 }
 \arguments{
-\item{formula}{A formula in the form of \code{exposure ~ outcome + covariates}}
+\item{formula}{A formula in the form of \code{exposure ~ outcome + covariates}.}
 
 \item{df}{A data.frame with \code{exposure}, \code{outcome} and
 \code{covariates}.}

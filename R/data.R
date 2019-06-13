@@ -1,6 +1,6 @@
 #' Synthetic toy data for clmi
 #'
-#' @format A data.frame with 100 obseration on 6 variables:
+#' @format A data.frame with 100 observations on 6 variables:
 #' \describe{
 #'   \item{id}{Patient ID number.}
 #'   \item{case_cntrl}{Patient's case-control status. Either 1 or 0.}
