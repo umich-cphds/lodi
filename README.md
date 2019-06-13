@@ -25,7 +25,7 @@ install lodi from GitHub.
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("umich-cphds/lodi, build_opt = c()")
+devtools::install_github("umich-cphds/lodi", build_opts = c())
 ```
 
 ## Getting help
