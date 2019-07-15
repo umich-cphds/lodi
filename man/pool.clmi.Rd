@@ -2,7 +2,7 @@
 % Please edit documentation in R/clmi.R
 \name{pool.clmi}
 \alias{pool.clmi}
-\title{Calculate pooled estimates from \code{clmi.out} objects.}
+\title{Calculate pooled estimates from \code{clmi.out} objects using Rubin's rules}
 \usage{
 pool.clmi(formula, clmi.out, type)
 }
@@ -16,7 +16,7 @@ pool.clmi(formula, clmi.out, type)
 logistic and linear.}
 }
 \description{
-Calculate pooled estimates from \code{clmi.out} objects.
+Calculate pooled estimates from \code{clmi.out} objects using Rubin's rules
 }
 \examples{
 # continue example from clmi

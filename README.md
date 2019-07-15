@@ -38,4 +38,5 @@ please email Jonathan Boss at <bossjona@umich.edu>.
 
 Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
 associations when exposure biomarker detection limits vary across
-batches. *Epidemiology*. 2019.
+batches. *Epidemiology*. 2019. Epub ahead of print.
+[10.1097/EDE.0000000000001052](https://doi.org/10.1097/EDE.0000000000001052)

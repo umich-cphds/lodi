@@ -45,7 +45,8 @@ clmi.out <- clmi(log(poll) ~ case_cntrl + smoking + gender, toy_data, lod, 1)
 
 }
 \references{
-Boss J, Mukherjee B, Ferguson KK, et al. Estimating
-  outcome-exposure associations when exposure biomarker detection limits
-  vary across batches. To appear in \emph{Epidemiology}. 2019.
+Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
+  associations when exposure biomarker detection limits vary across
+  batches. *Epidemiology*. 2019. Epub ahead of print.
+  [10.1097/EDE.0000000000001052](https://doi.org/10.1097/EDE.0000000000001052)
 }

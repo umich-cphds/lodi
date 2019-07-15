@@ -9,9 +9,10 @@ Authors@R: c(
     person("Alexander", "Rix", email = "alexrix@umich.edu", role = c("cre")))
 Description: Impute observed values below the limit of detection (LOD) via
     Censored likelihood Multiple Imputation (CLMI) in single-pollutant
-    models. CLMI handles exposure detection limits that may change throughout
-    the course of exposure assessment. 'lodi' provides functions for imputing
-    and pooling via this method.
+    models, developed by Boss et al (2019) <doi:10.1097/EDE.0000000000001052>.
+    CLMI handles exposure detection limits that may change throughout the course
+    of exposure assessment. 'lodi' provides functions for imputing and
+    pooling for this method.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
