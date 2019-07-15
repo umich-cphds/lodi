@@ -49,7 +49,7 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
   vars <- all.vars(rlang::f_rhs(formula))
   outcome <- vars[1]
   # Calculate the transformation function
-  eval(rlang::expr(`=`(!!exposure, quote(x))))
+  assign(substitute(exposure), quote(x))
   transform <- eval(rlang::expr(substitute(!!transform.init)))
   t.function <- function(x) x
   rlang::fn_body(t.function) <- transform
