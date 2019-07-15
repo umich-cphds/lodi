@@ -29,12 +29,12 @@ data("toy_data")
 head(toy_data, n = 10)
 ```
 
-`id` gives the study ID and is unimportant for the purposes of this
+`id` corresponds to the study ID and is unimportant for the purposes of this
 example. `case_cntrl` takes values 0 or 1, where 1 indicates that
 the subject has the disease of interest and 0 indicates that the subject is a
 healthy control. `poll` is the environmental exposure of interest, where `NA`
 indicates that the concentration is below the limit of detection (LOD).
-`smoking` and `gender` are covariates that we are going to include in the
+`smoking` and `gender` are the covariates that we are going to include in the
 imputation model. `lod` corresponds to the limit of detection for each
 individual's batch. Finally, `batch1` takes two values; 1 if the subject's
 biosample was assayed in batch 1 and 0 if the subject's biosample was assayed
@@ -72,16 +72,16 @@ outcome models using Rubin's rules. For details see `help(pool.clmi)`.
 results <- pool.clmi(formula = case_cntrl ~ poll_transform_imputed + smoking +
                                  gender, clmi.out = clmi.out, type = logistic)
 ```
-In this case, `formula` contains the outcome variable on the left hand side
+In `pool.clmi`, `formula` contains the outcome variable on the left hand side
 and the first variable on the right hand side should be the imputed exposure
 variable. `clmi` outputs the exposure variable as
-`((your-exposure))_transform_imputed`. In this case our exposure is `poll`,
-so the imputed variable is `poll_transform_imputed`.
+`((your-exposure))_transform_imputed`. In this example, our exposure is `poll`,
+so the name of the imputed variable is `poll_transform_imputed`.
 
 - Note: There are two valid options for the `type` argument. If you have binary
   outcome data (as in the current example) use `type = logistic` so that the
   model fit on the imputed datasets are logistic regression models. If you have
-  continuous outcome data use `regression.type = "linear"` so that the outcome
+  continuous outcome data use `regression.type = linear` so that the outcome
   models fit on the imputed datasets are linear regression models.
 
 To display the pooled results use `$output`:
