@@ -1,5 +1,5 @@
 ## Test environments
-* Windows 10 : R 3.6.1, 3.5.3, R-devel
+* Windows 10 : R 3.6.1, 3.5.3, R-devel 2019-07-05 r76784
 * Ubuntu 18.04.2 LTS : R 3.6.1
 
 ## R CMD check results
