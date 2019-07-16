@@ -34,8 +34,8 @@ example. `case_cntrl` takes values 0 or 1, where 1 indicates that
 the subject has the disease of interest and 0 indicates that the subject is a
 healthy control. `poll` is the environmental exposure of interest, where `NA`
 indicates that the concentration is below the limit of detection (LOD).
-`smoking` and `gender` are the covariates that we are going to include in the
-imputation model. `lod` corresponds to the limit of detection for each
+`smoking` and `gender` are covariates that we will include in the imputation
+model. `lod` corresponds to the limit of detection for each
 individual's batch. Finally, `batch1` takes two values; 1 if the subject's
 biosample was assayed in batch 1 and 0 if the subject's biosample was assayed
 in batch 2.
@@ -50,12 +50,12 @@ clmi.out <- clmi(formula = log(poll) ~ case_cntrl + smoking + gender,
                    df = toy_data, lod = lod, seed = 12345, n.imps = 5)
 ```
 
-The main input to `clmi` is a R formula. The left hand side of the formula
-must be the exposure, and the right hand side must be the outcome and then
-the other covariates of interest. The order of variables on the right hand side
-matters. You can apply a transformation to the exposure by applying a function
-to it, as done above. The `lod` variable should refer to the name of lod
-variable in your data.frame.
+The main input to `clmi` is a R formula. The left hand side of the formula must
+be the exposure, and the right hand side must be the outcome followed by the
+covariates you want to include in the imputation model. The order of variables
+on the right hand side matters. You can apply a transformation to the exposure
+by applying a univariate function to it, as done above. The `lod` argument
+refers to the name of the lod variable in your data.frame.
 
 The imputed datasets can be extracted as a list using `$imputed.dfs`:
 
@@ -81,8 +81,8 @@ so the name of the imputed variable is `poll_transform_imputed`.
 - Note: There are two valid options for the `type` argument. If you have binary
   outcome data (as in the current example) use `type = logistic` so that the
   model fit on the imputed datasets are logistic regression models. If you have
-  continuous outcome data use `regression.type = linear` so that the outcome
-  models fit on the imputed datasets are linear regression models.
+  continuous outcome data use `regression.type = linear` so that models fit on
+  the imputed datasets are linear regression models.
 
 To display the pooled results use `$output`:
 

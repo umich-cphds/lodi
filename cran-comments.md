@@ -1,6 +1,6 @@
 ## Test environments
-* Windows 10 : R 3.5.3
-* Ubuntu 18.04.2 LTS : R 3.6.0, R-devel (2019-06-12 r76696)
+* Windows 10 : R 3.6.1, 3.5.3, R-devel
+* Ubuntu 18.04.2 LTS : R 3.6.1
 
 ## R CMD check results
 There were no ERRORs or WARNINGs.
