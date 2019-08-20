@@ -4,7 +4,7 @@
 \alias{clmi}
 \title{Censored Likelihood Multiple Imputation}
 \usage{
-clmi(formula, df, lod, seed, n.imps = 5)
+clmi(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
 }
 \arguments{
 \item{formula}{A formula in the form of \code{exposure ~ outcome + covariates}.}
@@ -17,6 +17,9 @@ clmi(formula, df, lod, seed, n.imps = 5)
 \item{seed}{For reproducability.}
 
 \item{n.imps}{Number of datasets to impute. Default is 5.}
+
+\item{verbose}{If \code{TRUE} (default) print out useful debugging
+information while parsing \code{formula}.}
 }
 \description{
 This function performs censored likelihood multiple imputation for
@@ -47,6 +50,6 @@ clmi.out <- clmi(log(poll) ~ case_cntrl + smoking + gender, toy_data, lod, 1)
 \references{
 Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
   associations when exposure biomarker detection limits vary across
-  batches. *Epidemiology*. 2019. Epub ahead of print.
+  batches. _Epidemiology_. 2019. Epub ahead of print.
   [10.1097/EDE.0000000000001052](https://doi.org/10.1097/EDE.0000000000001052)
 }

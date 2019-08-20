@@ -14,6 +14,8 @@
 #' @param lod Name of limit of detection variable in \code{df}.
 #' @param n.imps Number of datasets to impute. Default is 5.
 #' @param seed For reproducability.
+#' @param verbose If \code{TRUE} (default) print out useful debugging
+#'   information while parsing \code{formula}.
 #' @note \code{clmi} only supports categorical variables that are numeric,
 #'   (i.e., not factors or characters). You can use the \code{model.matrix}
 #'   function to convert a data frame with factors to a numeric design matrix
@@ -31,23 +33,38 @@
 #' @references
 #'   Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
 #'   associations when exposure biomarker detection limits vary across
-#'   batches. \textit{Epidemiology}. 2019. Epub ahead of print.
+#'   batches. Epidemiology. 2019. Epub ahead of print.
 #'   [10.1097/EDE.0000000000001052](https://doi.org/10.1097/EDE.0000000000001052)
 #' @export
-clmi <- function(formula, df, lod, seed, n.imps = 5)
+clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
 {
   if (!rlang::is_formula(formula))
     stop("formula must be a formula")
   if (!is.data.frame(df))
     stop("df must be a data.frame.")
 
+  if (verbose)
+    print(paste("Formula:", rlang::expr_text(formula)))
+
   transform.init <- rlang::f_lhs(formula)
   exposure <- all.vars(transform.init)
   if (length(exposure) > 1)
     stop("Complicated transformation on exposure. See help for fix.")
 
+  if (verbose)
+    print(sprintf("Exposure variable: %s", exposure))
+
   vars <- all.vars(rlang::f_rhs(formula))
   outcome <- vars[1]
+
+  if (verbose)
+    print(sprintf("Outcome variable: %s", outcome))
+
+  if (length(unique(df[[outcome]])) != 2)
+    stop(paste(sprintf("Outcome (%s) variable is non binary.", outcome),
+               "The right hand side of formula may be incorrectly ordered.")
+    )
+
   # Calculate the transformation function
   assign(substitute(exposure), quote(x))
   transform <- eval(rlang::expr(substitute(!!transform.init)))
@@ -55,7 +72,15 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
   rlang::fn_body(t.function) <- transform
   rlang::fn_env(t.function) <- new.env()
 
+  if (verbose)
+      print(sprintf("Transformation function: %s",
+              gsub("\n", "", rlang::expr_text(t.function))
+      ))
+
   lod <- deparse(substitute(lod))
+  if (verbose)
+    print(sprintf("LOD variable: %s", lod))
+
   if (is.null(df[[lod]]))
     stop(sprintf("%s not in df", lod))
 
@@ -82,8 +107,9 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
   # will be used to ensure the imputed column ordering is the same
   df.names <- names(df)
 
-  df <- df[, c(vars,  lod)]
+  df <- df[, c(vars, lod)]
   t.imp.exp <- paste0(exposure, "_transform", "_imputed")
+
   df[[t.imp.exp]] <- df[[exposure]]
 
   obs.above.lod <- !is.na(df[[t.imp.exp]])
@@ -106,13 +132,13 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
     below.lod.bs <- df.bs[is.na(df.bs[[t.imp.exp]]),]
     below.lod.bs[[lod]] <- t.function(below.lod.bs[[lod]])
 
-    above.matrix.bs <- as.matrix(above.lod.bs[, vars[-c(1, 2)]])
-    below.matrix.bs <- as.matrix(below.lod.bs[, vars[-c(1, 2)]])
+    above.matrix.bs <- as.matrix(above.lod.bs[, vars[-(1:2)]])
+    below.matrix.bs <- as.matrix(below.lod.bs[, vars[-(1:2)]])
 
     # calculates the means of (1, exposure, covariates) given theta
     mu <- function(theta, outcome, covars)
     {
-      theta[1] + theta[2] * outcome + covars %*% theta[-(1:3)]
+      theta[2] + theta[3] * outcome + covars %*% theta[-(1:3)]
     }
 
     # objective function for mle
@@ -121,20 +147,21 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
     {
       mu.b <- mu(theta, below.lod.bs[[outcome]], below.matrix.bs)
       mu.a <- mu(theta, above.lod.bs[[outcome]], above.matrix.bs)
-      -sum(log(stats::pnorm(below.lod.bs[[lod]], mu.b, sqrt(theta[3])))) +
-        sum((above.lod.bs[[t.imp.exp]] - mu.a)^2) / (2 * theta[3]) +
-        nrow(above.lod.bs) * 0.5 * log(2 * pi * theta[3])
+      -sum(log(stats::pnorm(below.lod.bs[[lod]], mu.b, sqrt(theta[1])))) +
+        sum((above.lod.bs[[t.imp.exp]] - mu.a)^2) / (2 * theta[1]) +
+        nrow(above.lod.bs) * 0.5 * log(2 * pi * theta[1])
     }
 
     # get MLE for Bootstrapped sample
-    theta <- c(0, 0, 1, rep(0, length(vars[-c(1, 2)])))
-    # set lower bounds for theta(3) (variance)
-    lower <- c(-Inf, -Inf, 1e-12, rep(-Inf, length(vars[-c(1, 2)])))
+    theta <- c(1, 0, 0, rep(0, length(vars[-(1:2)])))
+
+    # set lower bounds for theta(1) (variance)
+    lower <- c( 1e-12, -Inf, -Inf, rep(-Inf, length(vars[-(1:2)])))
     mle   <- stats::optim(theta, objective, method = "L-BFGS-B", lower = lower)
 
     # Impute missing values
     mus   <- mu(mle$par, below.lod[[outcome]], below.matrix)
-    sigma <- sqrt(mle$par[3])
+    sigma <- sqrt(mle$par[1])
 
     normalize     <- function(x, mu, sd) (x - mu) / sd
     inv.normalize <- function(x, mu, sd) x * sd + mu
@@ -144,19 +171,28 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
     vals  <- inv.normalize(zs, mus, sigma)
     imp[[j]][[t.imp.exp]] <- as.vector(vals)
   }
+
   # Check MLE estimation for original dataset
+  mu <- function(theta, outcome, covars)
+  {
+    theta[2] + theta[3] * outcome + covars %*% theta[-(1:3)]
+  }
+
   objective <- function(theta)
   {
     mu.b <- mu(theta, below.lod[[outcome]], below.matrix)
     mu.a <- mu(theta, above.lod[[outcome]], above.matrix)
-    -sum(log(stats::pnorm(t.function(below.lod[[lod]]), mu.b, sqrt(theta[3])))) +
-      sum((t.function(above.lod[[t.imp.exp]]) - mu.a)^2) / (2 * theta[3]) +
-      nrow(above.lod) * 0.5 * log(2 * pi * theta[3])
+    -sum(log(stats::pnorm(t.function(below.lod[[lod]]), mu.b, sqrt(theta[1])))) +
+      sum((t.function(above.lod[[t.imp.exp]]) - mu.a)^2) / (2 * theta[1]) +
+      nrow(above.lod) * 0.5 * log(2 * pi * theta[1])
   }
 
-  hessian <- stats::optimHess(theta, objective)
+  mle <- stats::optim(theta, objective, method = "L-BFGS-B", lower = lower,
+                        hessian = T)
 
-  fisher.inf <- -solve(-hessian)
+  param <- mle$par
+  names(param) <- c("variance", "intercept", outcome, vars[-(1:2)])
+  fisher.inf <- -solve(-mle$hessian)
   prop.sigma <- sqrt(diag(fisher.inf))
   #Aggregate imputed datasets with observed dataset
   imputed.dfs <- imp
@@ -173,7 +209,7 @@ clmi <- function(formula, df, lod, seed, n.imps = 5)
 
   structure(
     list(formula = formula, nimp = n.imps, imputed.dfs = imputed.dfs,
-           t.function = t.function, mle = mle$par, fisher.inf = fisher.inf),
+           t.function = t.function, par.mle = param, fisher.inf = fisher.inf),
     class = "clmi.out")
 }
 
