@@ -9,7 +9,7 @@ clmi(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
 \arguments{
 \item{formula}{A formula in the form of \code{exposure ~ outcome + covariates}.
 That is, the first variable on the right hand side of \code{formula} should
-be the (binary) outcome of interest.}
+be the outcome of interest.}
 
 \item{df}{A data.frame with \code{exposure}, \code{outcome} and
 \code{covariates}.}
@@ -45,7 +45,7 @@ Roughly, the rules are:
     function. If the transformation function is not univariate, you ought to
     get an error about a "complicated" transformation.
   \item The first variable on the right hand side of \code{formula} should be
-    your binary outcome of interest.
+    your outcome of interest.
 }
 }
 \note{

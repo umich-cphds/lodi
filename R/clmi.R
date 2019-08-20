@@ -20,11 +20,11 @@
 #'     function. If the transformation function is not univariate, you ought to
 #'     get an error about a "complicated" transformation.
 #'   \item The first variable on the right hand side of \code{formula} should be
-#'     your binary outcome of interest.
+#'     your outcome of interest.
 #'}
 #' @param formula A formula in the form of \code{exposure ~ outcome + covariates}.
 #' That is, the first variable on the right hand side of \code{formula} should
-#' be the (binary) outcome of interest.
+#' be the outcome of interest.
 #' @param df A data.frame with \code{exposure}, \code{outcome} and
 #'   \code{covariates}.
 #' @param lod Name of limit of detection variable in \code{df}.
@@ -76,11 +76,6 @@ clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
 
   if (verbose)
     print(sprintf("Outcome variable: %s", outcome))
-
-  if (length(unique(df[[outcome]])) != 2)
-    stop(paste(sprintf("Outcome (%s) variable is non binary.", outcome),
-               "The right hand side of formula may be incorrectly ordered.")
-    )
 
   # Calculate the transformation function
   assign(substitute(exposure), quote(x))
