@@ -49,11 +49,15 @@ Roughly, the rules are:
 }
 }
 \note{
-\code{clmi} only supports categorical variables that are numeric,
-  (i.e., not factors or characters). You can use the \code{model.matrix}
-  function to convert a data frame with factors to a numeric design matrix
-  and subsequently convert that matrix back into a data frame using
-  \code{as.data.frame}.
+\itemize{
+  \item \code{clmi} only supports categorical variables that are numeric,
+    (i.e., not factors or characters). You can use the \code{model.matrix}
+    function to convert a data frame with factors to a numeric design matrix
+    and subsequently convert that matrix back into a data frame using
+    \code{as.data.frame}.
+  \item If you get the error message "L-BFGS-B needs finite values of 'fn'",
+    try normalising your data.
+}
 }
 \examples{
 library(lodi)
