@@ -8,8 +8,8 @@ clmi(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
 }
 \arguments{
 \item{formula}{A formula in the form of \code{exposure ~ outcome + covariates}.
-That is, the first variable on the right hand side of formula should be the
-(binary) outcome of interest.}
+That is, the first variable on the right hand side of \code{formula} should
+be the (binary) outcome of interest.}
 
 \item{df}{A data.frame with \code{exposure}, \code{outcome} and
 \code{covariates}.}
@@ -35,7 +35,7 @@ impute the non-detects, etc).
 \details{
 \code{clmi} is somewhat picky regarding the \code{formula} parameter. It
 tries to infer what transformation you'd like to apply to the exposure you
-are impute, what the exposure is, and what the outcome is. It attempts to
+are imputing, what the exposure is, and what the outcome is. It attempts to
 check to make sure that everything is working correctly, but it can fail.
 Roughly, the rules are:
 \itemize{
