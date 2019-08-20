@@ -98,10 +98,9 @@ results$regression.summaries
 ```
 
 ## Reference
-Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
-associations when exposure biomarker detection limits vary across
-batches. *Epidemiology*. 2019. Epub ahead of print.
-[10.1097/EDE.0000000000001052](https://doi.org/10.1097/EDE.0000000000001052)
+Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
+associations when exposure biomarker detection limits vary across batches.
+*Epidemiology*. 2019;30(5):746-755. [10.1097/EDE.0000000000001052](https://doi.org/10.1097/EDE.0000000000001052)
 
 ##Contact information
 

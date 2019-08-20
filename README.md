@@ -17,7 +17,7 @@ You can learn more about how to use CLMI by working through the
 example provided in `browseVignettes("lodi")`.
 
 ## Installation
-`lodi` requires `rlang >= 0.3.0` to be installed, so you may want to update `rlang` before installing. 
+`lodi` requires `rlang >= 0.3.0` to be installed, so you may want to update `rlang` before installing.
 ```r
 install.packages("lodi")
 ```
@@ -38,8 +38,7 @@ on [github](https://github.com/umich-cphds/lodi/issues). For questions,
 please email Jonathan Boss at <bossjona@umich.edu>.
 
 ## References
-
-Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
-associations when exposure biomarker detection limits vary across
-batches. *Epidemiology*. 2019. Epub ahead of print.
+Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
+associations when exposure biomarker detection limits vary across batches.
+*Epidemiology*. 2019;30(5):746-755.
 [10.1097/EDE.0000000000001052](https://doi.org/10.1097/EDE.0000000000001052)

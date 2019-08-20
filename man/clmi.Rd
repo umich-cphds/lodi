@@ -7,7 +7,9 @@
 clmi(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
 }
 \arguments{
-\item{formula}{A formula in the form of \code{exposure ~ outcome + covariates}.}
+\item{formula}{A formula in the form of \code{exposure ~ outcome + covariates}.
+That is, the first variable on the right hand side of formula should be the
+(binary) outcome of interest.}
 
 \item{df}{A data.frame with \code{exposure}, \code{outcome} and
 \code{covariates}.}
@@ -30,6 +32,22 @@ outputs a list containing the imputed datasets and details regarding the
 imputation procedure (i.e., number of imputed dataset, covariates used to
 impute the non-detects, etc).
 }
+\details{
+\code{clmi} is somewhat picky regarding the \code{formula} parameter. It
+tries to infer what transformation you'd like to apply to the exposure you
+are impute, what the exposure is, and what the outcome is. It attempts to
+check to make sure that everything is working correctly, but it can fail.
+Roughly, the rules are:
+\itemize{
+  \item The left hand side of formula should be the exposure you are trying
+    to impute.
+  \item the exposure may be optionally wrapped in a univariate transformation
+    function. If the transformation function is not univariate, you ought to
+    get an error about a "complicated" transformation.
+  \item The first variable on the right hand side of \code{formula} should be
+    your binary outcome of interest.
+}
+}
 \note{
 \code{clmi} only supports categorical variables that are numeric,
   (i.e., not factors or characters). You can use the \code{model.matrix}
@@ -39,8 +57,9 @@ impute the non-detects, etc).
 }
 \examples{
 library(lodi)
-data("toy_data")
-# run clmi
+
+# Note that the outcome of interest is the first variable on the right hand
+# side of formula.
 clmi.out <- clmi(poll ~ case_cntrl + smoking + gender, toy_data, lod, 1)
 
 # you can specify a transformation to the exposure in the formula
@@ -48,8 +67,8 @@ clmi.out <- clmi(log(poll) ~ case_cntrl + smoking + gender, toy_data, lod, 1)
 
 }
 \references{
-Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
-  associations when exposure biomarker detection limits vary across
-  batches. _Epidemiology_. 2019. Epub ahead of print.
-  [10.1097/EDE.0000000000001052](https://doi.org/10.1097/EDE.0000000000001052)
+Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
+  associations when exposure biomarker detection limits vary across batches.
+  Epidemiology. 2019;30(5):746-755.
+  \href{https://doi.org/10.1097/EDE.0000000000001052}{10.1097/EDE.0000000000001052}
 }

@@ -8,7 +8,23 @@
 #' imputation procedure (i.e., number of imputed dataset, covariates used to
 #' impute the non-detects, etc).
 #'
+#' \code{clmi} is somewhat picky regarding the \code{formula} parameter. It
+#' tries to infer what transformation you'd like to apply to the exposure you
+#' are impute, what the exposure is, and what the outcome is. It attempts to
+#' check to make sure that everything is working correctly, but it can fail.
+#' Roughly, the rules are:
+#' \itemize{
+#'   \item The left hand side of formula should be the exposure you are trying
+#'     to impute.
+#'   \item the exposure may be optionally wrapped in a univariate transformation
+#'     function. If the transformation function is not univariate, you ought to
+#'     get an error about a "complicated" transformation.
+#'   \item The first variable on the right hand side of \code{formula} should be
+#'     your binary outcome of interest.
+#'}
 #' @param formula A formula in the form of \code{exposure ~ outcome + covariates}.
+#' That is, the first variable on the right hand side of formula should be the
+#' (binary) outcome of interest.
 #' @param df A data.frame with \code{exposure}, \code{outcome} and
 #'   \code{covariates}.
 #' @param lod Name of limit of detection variable in \code{df}.
@@ -23,18 +39,19 @@
 #'   \code{as.data.frame}.
 #' @examples
 #' library(lodi)
-#' data("toy_data")
-#' # run clmi
+#'
+#' # Note that the outcome of interest is the first variable on the right hand
+#' # side of formula.
 #' clmi.out <- clmi(poll ~ case_cntrl + smoking + gender, toy_data, lod, 1)
 #'
 #' # you can specify a transformation to the exposure in the formula
 #' clmi.out <- clmi(log(poll) ~ case_cntrl + smoking + gender, toy_data, lod, 1)
 #'
 #' @references
-#'   Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
-#'   associations when exposure biomarker detection limits vary across
-#'   batches. Epidemiology. 2019. Epub ahead of print.
-#'   [10.1097/EDE.0000000000001052](https://doi.org/10.1097/EDE.0000000000001052)
+#'   Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
+#'   associations when exposure biomarker detection limits vary across batches.
+#'   Epidemiology. 2019;30(5):746-755.
+#'   \href{https://doi.org/10.1097/EDE.0000000000001052}{10.1097/EDE.0000000000001052}
 #' @export
 clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
 {
@@ -106,6 +123,7 @@ clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
 
   # will be used to ensure the imputed column ordering is the same
   df.names <- names(df)
+  df.rownames <- rownames(df)
 
   df <- df[, c(vars, lod)]
   t.imp.exp <- paste0(exposure, "_transform", "_imputed")
@@ -202,8 +220,12 @@ clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
   # dataframe and make sure it is in the same order as the original
   imputed.dfs <- lapply(imputed.dfs, function(df) {
       df <- rbind(df, above.lod)
-      df <- df[order(as.numeric(rownames(df))), ]
+
+      # reorder the rows so they match the original
+      df <- df[df.rownames, ]
       df <- cbind(df, leftovers)
+
+      # reorder the columns so they match the original
       df[, c(df.names, t.imp.exp)]
   })
 
