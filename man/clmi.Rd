@@ -41,7 +41,7 @@ Roughly, the rules are:
 \itemize{
   \item The left hand side of formula should be the exposure you are trying
     to impute.
-  \item the exposure may be optionally wrapped in a univariate transformation
+  \item The exposure may be optionally wrapped in a univariate transformation
     function. If the transformation function is not univariate, you ought to
     get an error about a "complicated" transformation.
   \item The first variable on the right hand side of \code{formula} should be
