@@ -17,7 +17,10 @@ You can learn more about how to use CLMI by working through the
 example provided in `browseVignettes("lodi")`.
 
 ## Installation
-
+`lodi` requires `rlang >= 0.3.0` to be installed, so you may want to update `rlang` before installing. 
+```r
+install.packages("lodi")
+```
 ## Development version
 
 To get a bug fix, or use a feature from the development version, you can
