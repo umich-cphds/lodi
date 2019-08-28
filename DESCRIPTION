@@ -2,8 +2,8 @@ Package: lodi
 Type: Package
 Title: Limit of Detection Imputation for Single-Pollutant Models
 Version: 0.9.1
-URL: https://github.com/umich-cphds/lodmi
-BugReports: https://github.com/umich-cphds/lodmi/issues
+URL: https://github.com/umich-cphds/lodi
+BugReports: https://github.com/umich-cphds/lodi/issues
 Authors@R: c(
     person("Jonathan", "Boss", email = "bossjona@umich.edu", role = c("aut")),
     person("Alexander", "Rix", email = "alexrix@umich.edu", role = c("aut", "cre")))
