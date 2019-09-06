@@ -60,179 +60,189 @@
 #' @export
 clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
 {
-  if (!rlang::is_formula(formula))
-    stop("formula must be a formula")
-  if (!is.data.frame(df))
-    stop("df must be a data.frame.")
+    if (!rlang::is_formula(formula))
+        stop("formula must be a formula")
+    if (!is.data.frame(df))
+        stop("df must be a data.frame.")
 
-  if (verbose)
-    print(paste("Formula:", rlang::expr_text(formula)))
+    if (verbose)
+        print(paste("Formula:", rlang::expr_text(formula)))
 
-  transform.init <- rlang::f_lhs(formula)
-  exposure <- all.vars(transform.init)
-  if (length(exposure) > 1)
-    stop("Complicated transformation on exposure. See help for fix.")
+    transform.init <- rlang::f_lhs(formula)
+    exposure <- all.vars(transform.init)
+    if (length(exposure) > 1)
+        stop("Complicated transformation on exposure. See help for fix.")
 
-  if (verbose)
-    print(sprintf("Exposure variable: %s", exposure))
+    if (verbose)
+        print(sprintf("Exposure variable: %s", exposure))
 
-  vars <- all.vars(rlang::f_rhs(formula))
-  outcome <- vars[1]
+    vars <- all.vars(rlang::f_rhs(formula))
+    outcome <- vars[1]
 
-  if (verbose)
-    print(sprintf("Outcome variable: %s", outcome))
+    if (verbose)
+        print(sprintf("Outcome variable: %s", outcome))
 
-  # Calculate the transformation function
-  assign(substitute(exposure), quote(x))
-  transform <- eval(rlang::expr(substitute(!!transform.init)))
-  t.function <- function(x) x
-  rlang::fn_body(t.function) <- transform
-  rlang::fn_env(t.function) <- new.env()
+    # Calculate the transformation function
+    assign(substitute(exposure), quote(x))
+    transform <- eval(rlang::expr(substitute(!!transform.init)))
+    trans <- function(x) x
+    rlang::fn_body(trans) <- transform
+    rlang::fn_env(trans) <- new.env()
 
-  if (verbose)
-      print(sprintf("Transformation function: %s",
-              gsub("\n", "", rlang::expr_text(t.function))
-      ))
+    if (verbose)
+        print(sprintf("Transformation function: %s",
+              gsub("\n", "", rlang::expr_text(trans))
+    ))
 
-  lod <- deparse(substitute(lod))
-  if (verbose)
-    print(sprintf("LOD variable: %s", lod))
+    lod <- deparse(substitute(lod))
+    if (verbose)
+        print(sprintf("LOD variable: %s", lod))
 
-  if (is.null(df[[lod]]))
-    stop(sprintf("%s not in df", lod))
+    if (is.null(df[[lod]]))
+        stop(sprintf("%s not in df", lod))
 
-  if (!is.numeric(df[[lod]]))
-   stop(sprintf("%s must be numeric."))
+    if (!is.numeric(df[[lod]]))
+        stop(sprintf("%s must be numeric."))
 
-  if (!is.numeric(seed))
-    stop("seed must be a number.")
-  set.seed(seed)
-  if (!is.numeric(n.imps))
-    stop("n.imps must be an integer.")
-  if (n.imps < 1)
-    stop("n.imps must be >= 1")
+    if (!is.numeric(seed))
+        stop("seed must be a number.")
 
-  vars <- c(exposure, vars)
-  if (any(sapply(vars, function(x) !is.numeric(df[[x]]))))
-    stop("clmi only supports floating point / integer variables.")
-  if (any(sapply(vars[-1], function(x) any(is.na(df[[x]])))))
-    stop("The covariates on the rhs of formula cannot contain missing values.")
+    set.seed(seed)
+    if (!is.numeric(n.imps))
+        stop("n.imps must be an integer.")
+    if (n.imps < 1)
+        stop("n.imps must be >= 1")
 
-  # columns to add back at the end
-  leftovers <- df[, setdiff(names(df), c(vars,  lod))]
+    vars <- c(exposure, vars)
+    if (any(sapply(vars, function(x) !is.numeric(df[[x]]))))
+        stop("clmi only supports floating point / integer variables.")
+    if (any(sapply(vars[-1], function(x) any(is.na(df[[x]])))))
+        stop("The covariates on the rhs of formula cannot contain missing values.")
 
-  # will be used to ensure the imputed column ordering is the same
-  df.names <- names(df)
-  df.rownames <- rownames(df)
 
-  df <- df[, c(vars, lod)]
-  t.imp.exp <- paste0(exposure, "_transform", "_imputed")
+    if (any(na.omit(df[[exposure]] < df[[lod]])))
+        stop(
+            sprintf("%s contains values below %s that are not coded as NA.",
+                    exposure, lod)
+    )
 
-  df[[t.imp.exp]] <- df[[exposure]]
+    # columns to add back at the end
+    leftovers <- df[, setdiff(names(df), c(vars,  lod))]
 
-  obs.above.lod <- !is.na(df[[t.imp.exp]])
-  # Subjects with concentration above LOD
-  above.lod <- df[obs.above.lod,]
-  # Subjects with concentration below LOD for each batch
-  below.lod <- df[!obs.above.lod,]
+    # will be used to ensure the imputed column ordering is the same
+    df.names    <- names(df)
+    df.rownames <- rownames(df)
 
-  above.matrix <- as.matrix(above.lod[, vars[-(1:2)]])
-  below.matrix <- as.matrix(below.lod[, vars[-(1:2)]])
-  # Perform Multiple Imputation
-  imp <- rep(list(below.lod), n.imps)
-  for (j in 1:n.imps) {
-    #Bootstrap data
-    df.bs <- df[sample(nrow(df), nrow(df), T),]
+    df <- df[, c(vars, lod)]
+    t.imp.exp <- paste0(exposure, "_transform", "_imputed")
 
-    above.lod.bs <- df.bs[!is.na(df.bs[[t.imp.exp]]),]
-    above.lod.bs[[t.imp.exp]] <- t.function(above.lod.bs[[t.imp.exp]])
+    df[[t.imp.exp]] <- df[[exposure]]
 
-    below.lod.bs <- df.bs[is.na(df.bs[[t.imp.exp]]),]
-    below.lod.bs[[lod]] <- t.function(below.lod.bs[[lod]])
+    obs.above <- !is.na(df[[t.imp.exp]])
+    # Subjects with concentration above LOD
+    above <- df[obs.above,]
+    # Subjects with concentration below LOD for each batch
+    below <- df[!obs.above,]
 
-    above.matrix.bs <- as.matrix(above.lod.bs[, vars[-(1:2)]])
-    below.matrix.bs <- as.matrix(below.lod.bs[, vars[-(1:2)]])
+    above.matrix <- as.matrix(above[, vars[-(1:2)]])
+    below.matrix <- as.matrix(below[, vars[-(1:2)]])
+    # Perform Multiple Imputation
+    imp <- rep(list(below), n.imps)
+    for (j in 1:n.imps) {
+        #Bootstrap data
+        df.bs <- df[sample(nrow(df), nrow(df), T),]
 
-    # calculates the means of (1, exposure, covariates) given theta
-    mu <- function(theta, outcome, covars)
-    {
-      theta[2] + theta[3] * outcome + covars %*% theta[-(1:3)]
+        above.bs <- df.bs[!is.na(df.bs[[t.imp.exp]]),]
+        above.bs[[t.imp.exp]] <- trans(above.bs[[t.imp.exp]])
+
+        below.bs <- df.bs[is.na(df.bs[[t.imp.exp]]),]
+        below.bs[[lod]] <- trans(below.bs[[lod]])
+
+        above.matrix.bs <- as.matrix(above.bs[, vars[-(1:2)]])
+        below.matrix.bs <- as.matrix(below.bs[, vars[-(1:2)]])
+
+        # calculates the means of (1, exposure, covariates) given beta
+        mu <- function(beta, outcome, covars)
+        {
+            beta[2] + beta[3] * outcome + covars %*% beta[-(1:3)]
+        }
+
+        # objective function for mle
+        # is smooth and convex. unique global minimum
+        objective <- function(beta)
+        {
+            mu.b <- mu(beta, below.bs[[outcome]], below.matrix.bs)
+            mu.a <- mu(beta, above.bs[[outcome]], above.matrix.bs)
+            -sum(log(stats::pnorm(below.bs[[lod]], mu.b, sqrt(exp(beta[1]))))) +
+            sum((above.bs[[t.imp.exp]] - mu.a)^2) / (2 * exp(beta[1])) +
+            nrow(above.bs) * 0.5 * log(2 * pi * exp(beta[1]))
+        }
+
+        # get MLE for Bootstrapped sample
+        beta <- c(0, 0, 0, rep(0, length(vars[-(1:2)])))
+
+        mle <- stats::optim(beta, objective, method = "BFGS")
+
+        # Impute missing values
+        mus   <- mu(mle$par, below[[outcome]], below.matrix)
+        sigma <- sqrt(exp(mle$par[1]))
+
+        normalize     <- function(x, mu, sd) (x - mu) / sd
+        inv.normalize <- function(x, mu, sd) x * sd + mu
+
+        probs <- stats::pnorm(normalize(trans(below[[lod]]), mus, sigma))
+        zs    <- stats::qnorm(stats::runif(nrow(below)) * probs)
+        vals  <- inv.normalize(zs, mus, sigma)
+        imp[[j]][[t.imp.exp]] <- as.vector(vals)
     }
 
-    # objective function for mle
-    # is smooth and convex. unique global minimum
-    objective <- function(theta)
+    # Check MLE estimation for original dataset
+    mu <- function(beta, outcome, covars)
     {
-      mu.b <- mu(theta, below.lod.bs[[outcome]], below.matrix.bs)
-      mu.a <- mu(theta, above.lod.bs[[outcome]], above.matrix.bs)
-      -sum(log(stats::pnorm(below.lod.bs[[lod]], mu.b, sqrt(theta[1])))) +
-        sum((above.lod.bs[[t.imp.exp]] - mu.a)^2) / (2 * theta[1]) +
-        nrow(above.lod.bs) * 0.5 * log(2 * pi * theta[1])
+        beta[2] + beta[3] * outcome + covars %*% beta[-(1:3)]
     }
 
-    # get MLE for Bootstrapped sample
-    theta <- c(1, 0, 0, rep(0, length(vars[-(1:2)])))
+    objective <- function(beta)
+    {
+        mu.b <- mu(beta, below[[outcome]], below.matrix)
+        mu.a <- mu(beta, above[[outcome]], above.matrix)
+        -sum(log(stats::pnorm(trans(below[[lod]]), mu.b, sqrt(exp(beta[1]))))) +
+        sum((trans(above[[t.imp.exp]]) - mu.a)^2) / (2 * exp(beta[1])) +
+        nrow(above) * 0.5 * log(2 * pi * exp(beta[1]))
+    }
 
-    # set lower bounds for theta(1) (variance)
-    lower <- c( 1e-12, -Inf, -Inf, rep(-Inf, length(vars[-(1:2)])))
-    mle   <- stats::optim(theta, objective, method = "L-BFGS-B", lower = lower)
+    mle <- stats::optim(beta, objective, method = "BFGS", hessian = T)
 
-    # Impute missing values
-    mus   <- mu(mle$par, below.lod[[outcome]], below.matrix)
-    sigma <- sqrt(mle$par[1])
+    param   <- mle$par
+    param[1] <- exp(param[1])
 
-    normalize     <- function(x, mu, sd) (x - mu) / sd
-    inv.normalize <- function(x, mu, sd) x * sd + mu
+    names(param) <- c("variance", "intercept", outcome, vars[-(1:2)])
 
-    probs <- stats::pnorm(normalize(t.function(below.lod[[lod]]), mus, sigma))
-    zs    <- stats::qnorm(stats::runif(nrow(below.lod)) * probs)
-    vals  <- inv.normalize(zs, mus, sigma)
-    imp[[j]][[t.imp.exp]] <- as.vector(vals)
-  }
+    jacobian <- diag(c(param[1], 1, 1, rep(1, length(vars[-(1:2)]))))
+    fisher.inf <- -jacobian %*% solve(-mle$hessian) %*% jacobian
+    prop.sigma <- sqrt(diag(fisher.inf))
 
-  # Check MLE estimation for original dataset
-  mu <- function(theta, outcome, covars)
-  {
-    theta[2] + theta[3] * outcome + covars %*% theta[-(1:3)]
-  }
+    #Aggregate imputed datasets with observed dataset
+    imputed.dfs <- imp
+    above[[t.imp.exp]] <- trans(above[[t.imp.exp]])
 
-  objective <- function(theta)
-  {
-    mu.b <- mu(theta, below.lod[[outcome]], below.matrix)
-    mu.a <- mu(theta, above.lod[[outcome]], above.matrix)
-    -sum(log(stats::pnorm(t.function(below.lod[[lod]]), mu.b, sqrt(theta[1])))) +
-      sum((t.function(above.lod[[t.imp.exp]]) - mu.a)^2) / (2 * theta[1]) +
-      nrow(above.lod) * 0.5 * log(2 * pi * theta[1])
-  }
+    # add imputed values, then add back the rest of the columns to to imputed
+    # dataframe and make sure it is in the same order as the original
+    imputed.dfs <- lapply(imputed.dfs, function(df)
+    {
+        df <- rbind(df, above)
+        # reorder the rows so they match the original
+        df <- df[df.rownames, ]
+        df <- cbind(df, leftovers)
+        # reorder the columns so they match the original
+        df[, c(df.names, t.imp.exp)]
 
-  mle <- stats::optim(theta, objective, method = "L-BFGS-B", lower = lower,
-                        hessian = T)
+    })
 
-  param <- mle$par
-  names(param) <- c("variance", "intercept", outcome, vars[-(1:2)])
-  fisher.inf <- -solve(-mle$hessian)
-  prop.sigma <- sqrt(diag(fisher.inf))
-  #Aggregate imputed datasets with observed dataset
-  imputed.dfs <- imp
-  above.lod[[t.imp.exp]] <- t.function(above.lod[[t.imp.exp]])
-
-  # add imputed values, then add back the rest of the columns to to imputed
-  # dataframe and make sure it is in the same order as the original
-  imputed.dfs <- lapply(imputed.dfs, function(df) {
-      df <- rbind(df, above.lod)
-
-      # reorder the rows so they match the original
-      df <- df[df.rownames, ]
-      df <- cbind(df, leftovers)
-
-      # reorder the columns so they match the original
-      df[, c(df.names, t.imp.exp)]
-  })
-
-  structure(
-    list(formula = formula, nimp = n.imps, imputed.dfs = imputed.dfs,
-           t.function = t.function, par.mle = param, fisher.inf = fisher.inf),
-    class = "clmi.out")
+    structure(
+        list(formula = formula, nimp = n.imps, imputed.dfs = imputed.dfs,
+            t.function = trans, par.mle = param, fisher.inf = fisher.inf),
+        class = "clmi.out")
 }
 
 #' Calculate pooled estimates from \code{clmi.out} objects using Rubin's rules
@@ -254,72 +264,74 @@ clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
 #' @export
 pool.clmi <- function(formula, clmi.out, type)
 {
-  if (class(clmi.out) != "clmi.out")
-    stop("clmi.out is not an clmi.out object.")
+    if (class(clmi.out) != "clmi.out")
+        stop("clmi.out is not an clmi.out object.")
 
-  type <- deparse(substitute(type))
-  type <- match.arg(type, c("linear","logistic"))
+    type <- deparse(substitute(type))
+    type <- match.arg(type, c("linear","logistic"))
 
-  # Get names used in clmi() function
-  imputed.dfs   <- clmi.out$imputed.dfs
-  n.imps <- clmi.out$nimp
-  nobs <- nrow(imputed.dfs[[1]])
+    # Get names used in clmi() function
+    imputed.dfs   <- clmi.out$imputed.dfs
+    n.imps <- clmi.out$nimp
+    nobs <- nrow(imputed.dfs[[1]])
 
-  # Get number of coefficients to store
-  # Get estimates and standard errors for each imputed dataset
-  betas       <- c()
-  varcov      <- vector("list", n.imps)
-  regressions <- vector("list", n.imps)
+    # Get number of coefficients to store
+    # Get estimates and standard errors for each imputed dataset
+    betas       <- c()
+    varcov      <- vector("list", n.imps)
+    regressions <- vector("list", n.imps)
 
-  if (type == "logistic") {
-    for(i in 1:n.imps) {
-      data.fit <- imputed.dfs[[i]]
-      logreg <- stats::glm(formula, family = "binomial", data = data.fit)
-      betas <- rbind(betas, stats::coefficients(logreg))
-      varcov[[i]]      <- summary(logreg)$cov.unscaled
-      regressions[[i]] <- logreg
+    if (type == "logistic") {
+        for(i in 1:n.imps) {
+            data.fit <- imputed.dfs[[i]]
+            logreg <- stats::glm(formula, family = "binomial", data = data.fit)
+            betas <- rbind(betas, stats::coefficients(logreg))
+            varcov[[i]]      <- summary(logreg)$cov.unscaled
+            regressions[[i]] <- logreg
+        }
+    } else {
+        for (i in 1:n.imps) {
+            data.fit <- imputed.dfs[[i]]
+            linreg <- stats::lm(formula, data = data.fit)
+            betas <- rbind(betas, stats::coefficients(linreg))
+            varcov[[i]]      <- stats::vcov(linreg)
+            regressions[[i]] <- linreg
+        }
     }
-  } else {
-    for (i in 1:n.imps) {
-      data.fit <- imputed.dfs[[i]]
-      linreg <- stats::lm(formula, data = data.fit)
-      betas <- rbind(betas, stats::coefficients(linreg))
-      varcov[[i]]      <- stats::vcov(linreg)
-      regressions[[i]] <- linreg
-    }
-  }
 
-  # Pooled Inference for Multiply Imputed Datasets
-  qbar <- apply(betas, 2, mean)
-  ubar <- Reduce('+', varcov) / n.imps
-  # Each column of this matrix is Qi - Qbar
-  q_diff <- apply(betas, 1, function(x) x - qbar)
-  ui <- matrix(0, ncol(betas), ncol(betas))
-  for (m in 1:ncol(q_diff)) {
-    ui <- ui + as.matrix(q_diff[,m]) %*% t(as.matrix(q_diff[,m]))
-  }
-  b <- ui / (n.imps-1)
-  t <- ubar + (1 + (1 / n.imps)) * b
-  gamma <- ((1 + (1 / n.imps)) * diag(b)) / diag(t)
-  r <- ((1 + (1 / n.imps)) * diag(b)) / diag(ubar)
-  v <- (n.imps - 1) * (1 + (1 / r))^2
-  v0 <- nobs - ncol(betas)
-  denom_adj_df <- ((1 - gamma) * v0 * (v0 + 1)) / (v0 + 3)
-  vstar <- ((1 / v) + (1 / denom_adj_df))^(-1)
+    # Pooled Inference for Multiply Imputed Datasets
+    qbar <- apply(betas, 2, mean)
+    ubar <- Reduce('+', varcov) / n.imps
 
-  #Get Confidence Intervals
-  LCL <- qbar - stats::qt(0.975, vstar) * sqrt(diag(t))
-  UCL <- qbar + stats::qt(0.975, vstar) * sqrt(diag(t))
+    # Each column of this matrix is Qi - Qbar
+    q_diff <- apply(betas, 1, function(x) x - qbar)
+    ui <- matrix(0, ncol(betas), ncol(betas))
+    for (m in 1:ncol(q_diff))
+        ui <- ui + as.matrix(q_diff[,m]) %*% t(as.matrix(q_diff[,m]))
 
-  #Get p-values
-  p_vals <- 2 * stats::pt(abs(qbar / sqrt(diag(t))), df = vstar, lower.tail = F)
+    b <- ui / (n.imps-1)
+    t <- ubar + (1 + (1 / n.imps)) * b
+    gamma <- ((1 + (1 / n.imps)) * diag(b)) / diag(t)
+    r <- ((1 + (1 / n.imps)) * diag(b)) / diag(ubar)
+    v <- (n.imps - 1) * (1 + (1 / r))^2
+    v0 <- nobs - ncol(betas)
+    denom_adj_df <- ((1 - gamma) * v0 * (v0 + 1)) / (v0 + 3)
+    vstar <- ((1 / v) + (1 / denom_adj_df))^(-1)
 
-  #Summary of each regression models on each imputed datasets
-  regression.summaries <- lapply(regressions, summary)
+    #Get Confidence Intervals
+    LCL <- qbar - stats::qt(0.975, vstar) * sqrt(diag(t))
+    UCL <- qbar + stats::qt(0.975, vstar) * sqrt(diag(t))
 
-  list(
-    output = data.frame(est = qbar, se = sqrt(diag(t)), df = vstar,
-      p.values = p_vals, LCL.95 = LCL, UCL.95 = UCL),
-    pooled.vcov = t, regressions = regressions,
-    regression.summaries = regression.summaries)
+    #Get p-values
+    p_vals <- 2 * stats::pt(abs(qbar / sqrt(diag(t))), df = vstar,
+                                lower.tail = F)
+
+    #Summary of each regression models on each imputed datasets
+    regression.summaries <- lapply(regressions, summary)
+
+    list(output = data.frame(est = qbar, se = sqrt(diag(t)), df = vstar,
+        p.values = p_vals, LCL.95 = LCL, UCL.95 = UCL),
+        pooled.vcov = t, regressions = regressions,
+        regression.summaries = regression.summaries
+    )
 }
