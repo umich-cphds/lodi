@@ -1,18 +1,19 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-`lodi` is a package that implements censored likelihood multiple
+`lodi` is a R package that implements censored likelihood multiple
 imputation (CLMI) for single pollutant models with exposure biomarkers
 below their respective detection limits. `lodi` also contains implementations
 for standard methods such as single imputation with a constant and
-complete-case analysis.
+complete-case analysis, although those methods are primarily designed for comparison with `clmi`.
 ## Installation
-`lodi` requires `rlang >= 0.3.0` to be installed, so you may want to update `rlang` before installing.
+`lodi` requires `rlang >= 0.3.0` to be installed, so you may want to install /update `rlang` before installing `lodi`.
+
 The package can be installed from CRAN 
 ```r
 install.packages("lodi")
 ```
-Or from Github.
+Or from Github
 ``` r
 # install.packages("devtools")
 devtools::install_github("umich-cphds/lodi", build_opts = c())
