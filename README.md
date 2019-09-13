@@ -28,7 +28,7 @@ vignete("lodi")
 to learn how to use the method.
 
 ## Bugs
-If you encounter a bug, please open an issue in the 'Issues' tab on Github. 
+If you encounter a bug, please open an issue on the [Issues](https://github.com/umich-cphds/lodi/issues) tab on Github. 
 ## Contact
 For questions ot feedback, please email Jonathan Boss at <bossjona@umich.edu> or Alexander Rix <alexrix@umich.edu>.
 ## References
