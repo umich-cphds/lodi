@@ -18,7 +18,7 @@ Or from Github
 # install.packages("devtools")
 devtools::install_github("umich-cphds/lodi", build_opts = c())
 ```
-The github version may contain bugfixes not yet present on CRAN, so if you are experiencing issues, you may want to try the Github version of the package.
+The github version may contain bug fixes not yet present on CRAN, so if you are experiencing issues, you may want to try the Github version of the package.
 
 ## Example
 Once `lodi` is installed, you can load up R and type 
