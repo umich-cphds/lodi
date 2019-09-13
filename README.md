@@ -1,5 +1,4 @@
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+# lodi
 
 `lodi` is a R package that implements censored likelihood multiple
 imputation (CLMI) for single pollutant models with exposure biomarkers
