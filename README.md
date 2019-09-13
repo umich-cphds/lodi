@@ -1,42 +1,36 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# lodi
-
-## Overview
-
 `lodi` is a package that implements censored likelihood multiple
 imputation (CLMI) for single pollutant models with exposure biomarkers
-below their respective detection limits. Additionally, implementations
+below their respective detection limits. `lodi` also contains implementations
 for standard methods such as single imputation with a constant and
-complete-case analysis are provided, although we do not recommend these
-methods for datasets with a relatively high percent below their
-respective detection limits (say \>25%).
-
-You can learn more about how to use CLMI by working through the
-example provided in `browseVignettes("lodi")`.
-
+complete-case analysis.
 ## Installation
 `lodi` requires `rlang >= 0.3.0` to be installed, so you may want to update `rlang` before installing.
+The package can be installed from CRAN 
 ```r
 install.packages("lodi")
 ```
-## Development version
-
-To get a bug fix, or use a feature from the development version, you can
-install lodi from GitHub.
-
+Or from Github.
 ``` r
 # install.packages("devtools")
 devtools::install_github("umich-cphds/lodi", build_opts = c())
 ```
+The github version may contain bugfixes not yet present on CRAN, so if you are experiencing issues, you may want to try the Github version of the package.
 
-## Getting help
+## Example
+Once `lodi` is installed, you can load up R and type 
 
-If you encounter a clear bug, please file a minimal reproducible example
-on [github](https://github.com/umich-cphds/lodi/issues). For questions,
-please email Jonathan Boss at <bossjona@umich.edu>.
+```
+vignete("lodi")
+```
+to learn how to use the method.
 
+## Bugs
+If you encounter a bug, please open an issue in the 'Issues' tab on Github. 
+## Contact
+For questions ot feedback, please email Jonathan Boss at <bossjona@umich.edu> or Alexander Rix <alexrix@umich.edu>.
 ## References
 Boss J, Mukherjee B, Ferguson KK, et al. Estimating outcome-exposure
 associations when exposure biomarker detection limits vary across batches.
