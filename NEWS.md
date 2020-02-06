@@ -1,8 +1,13 @@
 # lodi v0.9.2
 
 ## Minor changes
-* Added check to see there is exposure data not code as `NA` that is below the given `lod` variable in `clmi`. This is good check in and of itself, but in particular it is supposed to help when users input an already log transformed exposure in clmi, while inputing an untransformed `lod` variable. This isn't perfect, but it hopefuly should help.
-* Changed the optimization algorithm uses in the MLE procedure from `L-BFGS-B` to `BFGS`. Using the boxed constrained version of `BFGS` could cause non-finite values of the objective function due to large gradients when evaluating the initial value of the function. These large gradients could be due to the slack variables being activate initially, but it is unclear. At any rate, `clmi` now uses `BFGS` with a reparameterized variance (`:= exp(var)`) to ensure non-negativity, with the appropriate transformations to the fisher information matrix to ensure it gives the same answer as before.
+* Added badges to README.Rmd / README.md to show the CRAN version of lodi, Github version of lodi, and a Travis-CI badge showing whether or not lodi tests are passing.
+* Added unit tests to be run when updating the package / before CRAN submission.
+* Added check to ensure exposure data that is below the `lod' is coded as `NA`. Users might input an already log transformed exposure in clmi, while imputing an untransformed `lod` variable.
+* Changed the optimization algorithm uses in the MLE procedure from `L-BFGS-B` to `BFGS` with reparameterized variance (`:= exp(var)`) to ensure non-negativity instead of box constraints. Using `L-BFGS-B` could cause non-finite values of the objective function due to large gradients when evaluating the initial value of the function.
+
+## Bug fixes
+* Fixed a subtle bug when calling lodi inside of a function when using a custom exposure function. lodi was internally using the parent frame to enclose the transformation, which is the lodi package namespace, instead of the caller's frame.
 
 # lodi v0.9.1
 
@@ -16,4 +21,4 @@
 * `clmi` now returns imputed data.frames that have the same row ordering as the original.
 
 # lodi v0.9.0
-Initial release.
+Initial CRAN release.
