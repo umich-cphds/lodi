@@ -30,8 +30,8 @@
 #' @param lod Name of limit of detection variable in \code{df}.
 #' @param n.imps Number of datasets to impute. Default is 5.
 #' @param seed For reproducability.
-#' @param verbose If \code{TRUE} (default) print out useful debugging
-#'   information while parsing \code{formula}.
+#' @param verbose If \code{TRUE}, \code{clmi} prints out useful debugging
+#'   information while running. Default is \code{FALSE}.
 #' @note
 #' \itemize{
 #'   \item \code{clmi} only supports categorical variables that are numeric,
@@ -46,7 +46,7 @@
 #' library(lodi)
 #'
 #' # Note that the outcome of interest is the first variable on the right hand
-#' # side of formula.
+#' # side of the formula.
 #' clmi.out <- clmi(poll ~ case_cntrl + smoking + gender, toy_data, lod, 1)
 #'
 #' # you can specify a transformation to the exposure in the formula
@@ -58,12 +58,14 @@
 #'   Epidemiology. 2019;30(5):746-755.
 #'   \href{https://doi.org/10.1097/EDE.0000000000001052}{10.1097/EDE.0000000000001052}
 #' @export
-clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
+clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = FALSE)
 {
     if (!rlang::is_formula(formula))
         stop("formula must be a formula")
     if (!is.data.frame(df))
         stop("df must be a data.frame.")
+    if (!is.logical(verbose))
+        stop("'verbose' must take on a logical value.")
 
     if (verbose)
         print(paste("Formula:", rlang::expr_text(formula)))
@@ -86,7 +88,7 @@ clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
     transform <- eval(rlang::expr(substitute(!!transform.init)))
     trans <- function(x) x
     rlang::fn_body(trans) <- transform
-    rlang::fn_env(trans) <- new.env()
+    rlang::fn_env(trans) <- rlang::caller_env()
 
     if (verbose)
         print(sprintf("Transformation function: %s",
@@ -103,11 +105,11 @@ clmi <- function(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
     if (!is.numeric(df[[lod]]))
         stop(sprintf("%s must be numeric."))
 
-    if (!is.numeric(seed))
+    if (!is.numeric(seed) || length(seed) > 1)
         stop("seed must be a number.")
 
     set.seed(seed)
-    if (!is.numeric(n.imps))
+    if (!is.numeric(n.imps) || length(n.imps) > 1)
         stop("n.imps must be an integer.")
     if (n.imps < 1)
         stop("n.imps must be >= 1")

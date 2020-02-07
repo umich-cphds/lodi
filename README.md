@@ -21,7 +21,7 @@ Installation
 ------------
 
 `lodi` requires `rlang >= 0.3.0` to be installed, so you may want to
-install /update `rlang` before installing `lodi`.
+install or update `rlang` before installing `lodi`.
 
 The package can be installed from CRAN
 

@@ -40,7 +40,7 @@ lod_cca <- function(formula, df, type)
 #'
 #' lod_root2 is a helper function that performs single imputation with
 #' \code{lod / sqrt(2)}, a common ad hoc approach used in single-pollutant
-#' modeling. The function can be  used to compare with clmi.
+#' modeling. The function can be used to compare with clmi.
 #' @param formula A R formula in the form \code{outcome ~ exposure + covariates}.
 #' @param df A data.frame that contains the variables \code{formula}
 #'    references.
@@ -102,7 +102,7 @@ lod_root2 <- function(formula, df, lod, type)
     # Calculate the transformation function
     t.function <- function(x) x
     body(t.function) <- transform
-    environment(t.function) <- new.env()
+    environment(t.function) <- rlang::caller_env()
 
     # calculate the name of the transformed lod variable
     assign("x", substitute(lod))

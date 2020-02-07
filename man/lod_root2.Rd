@@ -20,14 +20,14 @@ linear and logistic.}
 \description{
 lod_root2 is a helper function that performs single imputation with
 \code{lod / sqrt(2)}, a common ad hoc approach used in single-pollutant
-modeling. The function can be  used to compare with clmi.
+modeling. The function can be used to compare with clmi.
 }
 \note{
-Depending on the transformation used, a "Complicated transformation" error
- may occur. For example, the transformation \code{a * exposure} will cause an
- error. In this case, define a transformation function as
- \code{f <- function(exposure) a * exposure} and use \code{f} in your
- formula. This technical limitation is unavoidable at the moment.
+Depending on the transformation used, a "Complicated transformation"
+    error may occur. For example, the transformation \code{a * exposure} will
+    cause an error. In this case, define a transformation function as
+    \code{f <- function(exposure) a * exposure} and use \code{f} in your
+    formula. This technical limitation is unavoidable at the moment.
 }
 \examples{
 # load lodi's toy data

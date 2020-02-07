@@ -4,7 +4,7 @@
 \alias{clmi}
 \title{Censored Likelihood Multiple Imputation}
 \usage{
-clmi(formula, df, lod, seed, n.imps = 5, verbose = TRUE)
+clmi(formula, df, lod, seed, n.imps = 5, verbose = FALSE)
 }
 \arguments{
 \item{formula}{A formula in the form of \code{exposure ~ outcome + covariates}.
@@ -20,8 +20,8 @@ be the outcome of interest.}
 
 \item{n.imps}{Number of datasets to impute. Default is 5.}
 
-\item{verbose}{If \code{TRUE} (default) print out useful debugging
-information while parsing \code{formula}.}
+\item{verbose}{If \code{TRUE}, \code{clmi} prints out useful debugging
+information while running. Default is \code{FALSE}.}
 }
 \description{
 This function performs censored likelihood multiple imputation for
@@ -63,7 +63,7 @@ Roughly, the rules are:
 library(lodi)
 
 # Note that the outcome of interest is the first variable on the right hand
-# side of formula.
+# side of the formula.
 clmi.out <- clmi(poll ~ case_cntrl + smoking + gender, toy_data, lod, 1)
 
 # you can specify a transformation to the exposure in the formula
