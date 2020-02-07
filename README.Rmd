@@ -52,7 +52,7 @@ Or from Github
 # install.packages("devtools")
 devtools::install_github("umich-cphds/lodi", build_opts = c())
 ```
-The github version may contain bug fixes not yet present on CRAN,
+The Github version may contain bug fixes not yet present on CRAN,
 so if you are experiencing issues, you may want to try the Github
 version of the package.
 
