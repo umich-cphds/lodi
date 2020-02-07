@@ -1,6 +1,7 @@
 ## Test environments
-* winbuilder : 3.5.3
-* Ubuntu 18.04.3 LTS : R devel (2019-08-27 r77080),  R 3.6.1
+* Ubuntu 16.04 (travis): r-devel (2020-02-06 r77742), r-release (3.6.2), r-oldrelease (3.5.3)
+* winbuilder: r-release (3.6.2), r-oldrelease (3.5.3)
+
 
 ## R CMD check results
 There were no ERRORs, WARNINGs, or NOTES.
