@@ -8,25 +8,12 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
-  version.github <- as.vector(read.dcf('DESCRIPTION')[, 'Version'])
-  version.github <- gsub('-', '.', version.github)
-
-  # get the version from the CRAN package mirror
-  cran.dcf.con <- url("https://raw.githubusercontent.com/cran/lodi/master/DESCRIPTION")
-  version.cran <- read.dcf(file = cran.dcf.con)[, "Version"]
-  close(cran.dcf.con)
-  if (version.cran == version.github) {
-      color <- "success"
-  } else {
-      color <- "informational"
-  }
-
 
 ```
 <!-- badges: start -->
-[![CRAN Version](https://www.r-pkg.org/badges/version/lodi)](https://cran.r-project.org/package=lodi)
-[![Github Version](https://img.shields.io/badge/Github-`r version.github`-`r color`.svg?style=flat)](https://github.com/umich-cphds/lodi)
-[![Travis CI](https://travis-ci.org/umich-cphds/lodi.svg?branch=master)](https://travis-ci.org/umich-cphds/lodi)
+[![CRAN Version](https://img.shields.io/cran/v/lodi?style=flat-square)](https://cran.r-project.org/package=lodi)
+[![GitHub Release](https://img.shields.io/github/v/release/umich-cphds/lodi?include_prereleases&label=Github&style=flat-square)](https://github.com/umich-cphds/lodi)
+[![Travis CI](https://img.shields.io/travis/umich-cphds/lodi?style=flat-square)(https://travis-ci.org/umich-cphds/lodi)
 <!-- badges: end -->
 
 
