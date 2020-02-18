@@ -1,3 +1,8 @@
+# lodi v1.0.0
+
+## Major changes
+* lodi now requires R >= 3.5.0 due to object serialization changes
+ 
 # lodi v0.9.2
 
 ## Minor changes
