@@ -3,8 +3,8 @@
 Version](https://img.shields.io/cran/v/lodi?style=flat-square)](https://cran.r-project.org/package=lodi)
 [![GitHub
 Release](https://img.shields.io/github/v/release/umich-cphds/lodi?include_prereleases&label=Github&style=flat-square)](https://github.com/umich-cphds/lodi)
-\[![Travis
-CI](https://img.shields.io/travis/umich-cphds/lodi?style=flat-square)(<https://travis-ci.org/umich-cphds/lodi>)
+[![Travis
+CI](https://img.shields.io/travis/umich-cphds/lodi?style=flat-square)](https://travis-ci.org/umich-cphds/lodi)
 <!-- badges: end -->
 
 Limit of Detection Multiple Imputation
