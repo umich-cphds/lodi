@@ -1,6 +1,6 @@
 <!-- badges: start -->
 [![CRAN
-Version](https://img.shields.io/cran/v/lodi?style=flat-square&color=blue)](https://cran.r-project.org/package=lodi)
+Version](https://img.shields.io/cran/v/lodi?style=flat-square&color=blue&label=CRAN)](https://cran.r-project.org/package=lodi)
 [![GitHub
 Release](https://img.shields.io/github/v/release/umich-cphds/lodi?include_prereleases&label=Github&style=flat-square)](https://github.com/umich-cphds/lodi)
 [![Travis
