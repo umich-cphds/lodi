@@ -1,10 +1,10 @@
 <!-- badges: start -->
 [![CRAN
-Version](https://www.r-pkg.org/badges/version/lodi)](https://cran.r-project.org/package=lodi)
-[![Github
-Version](https://img.shields.io/badge/Github-0.9.2-informational.svg?style=flat)](https://github.com/umich-cphds/lodi)
+Version](https://img.shields.io/cran/v/lodi?style=flat-square)](https://cran.r-project.org/package=lodi)
+[![GitHub
+Release](https://img.shields.io/github/v/release/umich-cphds/lodi?include_prereleases&label=Github&style=flat-square)](https://github.com/umich-cphds/lodi)
 [![Travis
-CI](https://travis-ci.org/umich-cphds/lodi.svg?branch=master)](https://travis-ci.org/umich-cphds/lodi)
+CI](https://img.shields.io/travis/umich-cphds/lodi?style=flat-square)](https://travis-ci.org/umich-cphds/lodi)
 <!-- badges: end -->
 
 Limit of Detection Multiple Imputation
